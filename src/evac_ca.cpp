@@ -1,8 +1,9 @@
 #include "evac_ca.h"
 
-EvacCA::EvacCA(unsigned x, unsigned y) {
-    cells = std::vector<std::vector<EvacCACell>>(
-        y, std::vector<EvacCACell>(x));
+EvacCA::EvacCA(unsigned x, unsigned y) :
+    cells(y, std::vector<EvacCACell>(x))
+{
+
 }
 
 bool EvacCA::evolve() {
