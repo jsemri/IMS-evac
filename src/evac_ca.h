@@ -47,8 +47,9 @@ private:
                cells[row][col].cell_type == Exit; // XXX Exit?
     };
 
-    /// returns true if cell at specified position is empty or it is an exit
-    inline void push_if_empty(
+    /// push an position(row,col) to the vector if cell at this position is
+ 	/// empty
+ 	inline void push_if_empty(
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
         if (is_empty(row, col)) {
