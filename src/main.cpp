@@ -12,7 +12,6 @@ const char *helpstr =
 "  -t <DELAY>    : set delay of next step of evolution in ms, if not \n"
 "                  specified the steps of the evolution are managed bye \n"
 "                  hitting the Enter key\n"
-"  -r            : use real-time simulation\n"
 "  -p <N>        : number of people to evacuate, default 100\n";
 
 int main(int argc, char **argv) {
@@ -22,7 +21,7 @@ int main(int argc, char **argv) {
     int opt_cnt = 1;    // used for locating positional argument
     int c;              // reading the options
 
-    while ((c = getopt(argc, argv, "hd:p:r")) != -1) {
+    while ((c = getopt(argc, argv, "ht:p:")) != -1) {
         opt_cnt++;
         switch (c) {
             // TODO add more options later
@@ -36,9 +35,6 @@ int main(int argc, char **argv) {
             case 'p':
                 opt_cnt++;
                 people = std::stoi(optarg);
-                break;
-            case 'r':
-                delay = 1000 * 400; // XXX simulation time = real time
                 break;
             default:
                 return 1;
