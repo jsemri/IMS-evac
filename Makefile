@@ -1,6 +1,6 @@
 PROG=evac
 CXX=g++
-CXXFLAGS=-std=c++14 -Wall -Wextra -pedantic
+CXXFLAGS=-std=c++14 -Wall -Wextra -pedantic -I 3rdparty
 
 SRCDIR=src
 SRC=$(wildcard $(SRCDIR)/*.cpp)

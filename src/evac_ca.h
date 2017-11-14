@@ -38,11 +38,15 @@ private:
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
 
     // inline methods
+
+    /// returns true if cell at specified position is empty or it is an exit
     inline bool is_empty(size_t row, size_t col) const {
         return cells[row][col].cell_type == Empty ||
                cells[row][col].cell_type == Exit; // XXX Exit?
     };
 
+    /// push an position(row,col) to the vector if cell at this position is
+    /// empty
     inline void push_if_empty(
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
@@ -51,14 +55,17 @@ private:
         }
     }
 
+    /// return a distance to exit from cell at specified position
     inline int distance(CellPosition pos) const {
         return distance(pos.first, pos.second);
     }
 
+    /// return a distance to exit from cell at specified position
     inline int distance(size_t row, size_t col) const {
         return cells[row][col].exit_distance;
     }
 
+    /// return a reference to a cell at specified position
     inline Cell& get_cell(CellPosition pos) {
         return cells[pos.first][pos.second];
     }

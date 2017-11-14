@@ -93,7 +93,7 @@ bool EvacCA::evolve() {
         }
     }
 
-    return false; // TODO remove
+    //return false; // TODO remove
     return state_change;
 }
 
