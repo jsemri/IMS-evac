@@ -14,9 +14,86 @@ EvacCA::EvacCA(unsigned x, unsigned y) :
 
 }
 
+std::vector<EvacCA::CellPosition>
+EvacCA::cell_neighbourhood(CellPosition position) const {
+    std::vector<CellPosition> neighbours;
+    size_t row = position.first;
+    size_t col = position.second;
+    size_t max_row = cells.size();
+    size_t max_col = cells[0].size();
+
+    if (row != 0) {
+        push_if_empty(neighbours, row - 1, col);
+    }
+
+    if (row != max_row) {
+        push_if_empty(neighbours, row + 1, col);
+    }
+
+    if (col != 0) {
+        push_if_empty(neighbours, row, col - 1);
+    }
+
+    if (col != max_col) {
+        push_if_empty(neighbours, row, col + 1);
+    }
+
+    if (col != 0 && row != 0) {
+        push_if_empty(neighbours, row - 1, col - 1);
+        push_if_empty(neighbours, row - 1, col - 1);
+    }
+
+    if (col != max_col && row != max_row) {
+        push_if_empty(neighbours, row + 1, col + 1);
+        push_if_empty(neighbours, row + 1, col + 1);
+    }
+
+    return neighbours;
+}
+
 bool EvacCA::evolve() {
-    // TODO
-    return false;
+
+    bool state_change = false;
+    std::random_shuffle(
+        people.begin(), people.end(),
+        [](int i) { return std::rand() % i;});
+
+    for (auto &i : people) {
+
+        if (get_cell(i).evacuated) {
+            // already evacuated
+            continue;
+        }
+
+        state_change = true;
+
+        auto neighbours = cell_neighbourhood(i);
+        // find min value
+        if (!neighbours.empty()) {
+            auto dist = *std::min_element(
+                neighbours.begin(), neighbours.end(),
+                [this](const CellPosition a, const CellPosition b) {
+                    return distance(a) < distance(b);
+                });
+
+            if (distance(dist) < distance(i)) {
+                // move the person
+                get_cell(i) = Cell();
+                i = dist;
+                get_cell(i).cell_type = Person;
+            }
+            // TODO else if chaos
+
+            // if value is zero -> leave the system
+            if (distance(i) == 0) {
+                // TODO erase from vector? Label as evacuated?
+                get_cell(i).evacuated = true;
+            }
+        }
+    }
+
+    return false; // TODO remove
+    return state_change;
 }
 
 // somehow distribute people over empty cells
