@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cassert>
 
+#include "bitmap_image.hpp"
 #include "evac_ca.h"
 
 EvacCA::EvacCA(unsigned x, unsigned y) :
@@ -145,9 +146,41 @@ void EvacCA::add_people(int people_count) {
 }
 
 EvacCA EvacCA::load_from_pixmap(const std::string &filename) {
-    // TODO
-    // load CA from an image
-    return EvacCA(1000, 1000);
+   	// Open file
+	bitmap_image image(filename);
+	if(!image) {
+		// Could not open file
+		throw std::invalid_argument("could not open input file");
+	}
+
+	// Read dimensions
+	int width = image.width();
+	int height = image.height();
+	EvacCA ca(height, width);
+	
+	// Read colors
+	for(int row = 0; row < height; row++) {
+		for(int col = 0; col < width; col++) {
+			// Differentiate colors
+			unsigned char r, g, b;
+			image.get_pixel(row, col, r, g, b);
+			CellType type;
+			if(r == 255 && g == 255 && b == 255) {
+				// Wall is black
+				type = Wall;
+			} else if(r == 255 && g == 0 && b == 0) {
+				// Exit is red
+				type = Exit;
+			} else {
+				// Everything else is empty
+				type = Empty;
+			}
+			ca.cells[row][col].cell_type = type;
+		}
+	}
+	
+	// Success
+	return ca;
 }
 
 void EvacCA::show() const {
@@ -155,3 +188,36 @@ void EvacCA::show() const {
     // output CA as an image
 }
 
+/**
+ * Simple model creation: four walls and one exit.
+ * @param wall length
+ *
+static void sample(int length) {
+	// Set dimensions
+	int width = length, height = length;
+	
+	// Create image
+	bitmap_image image(width, height);
+	
+	// White background
+	image.set_all_channels(255, 255, 255);
+	
+	// Set drawer
+	image_drawer draw(image);
+	draw.pen_width(1);
+	
+	// Draw walls
+	draw.pen_color(0, 0, 0);
+	draw.horiztonal_line_segment(0, width, 0);
+	draw.horiztonal_line_segment(0, width, height-1);
+	draw.vertical_line_segment(0, height, 0);
+	draw.vertical_line_segment(0, height, height-1);
+	
+	// Draw exit
+	draw.pen_color(255,0,0);
+	draw.plot_pixel(width/2,0);
+	
+	// Output
+	image.save_image("output.bmp");
+}
+**/
