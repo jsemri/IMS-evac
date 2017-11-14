@@ -4,14 +4,13 @@
 #include <vector>
 #include <iostream>
 
-class EvacCA {
-private:
-    // position in matrix
-    using CellPosition = std::pair<size_t, size_t>;
-    // type of a cell
-    enum CellType {
-        Empty = 0, Wall, Obstacle, Person, Exit};
+// type of a cell
+enum CellType {
+    Empty = 0, Wall, Obstacle, Person, Exit
+};
 
+class EvacCA {
+public:
     // cell structure
     struct Cell {
         CellType cell_type;
@@ -28,12 +27,15 @@ private:
         Cell() : cell_type{Empty}, exit_distance{-1} {}
     };
 
+
+private:
+    // position in matrix
+    using CellPosition = std::pair<size_t, size_t>;
+
     // 2D matrix of cells
     std::vector<std::vector<Cell>> cells;
     // positions of the people to evacuate
     std::vector<CellPosition> people;
-
-
 
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
 
@@ -45,8 +47,7 @@ private:
                cells[row][col].cell_type == Exit; // XXX Exit?
     };
 
-    /// push an position(row,col) to the vector if cell at this position is
-    /// empty
+    /// returns true if cell at specified position is empty or it is an exit
     inline void push_if_empty(
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
@@ -77,10 +78,21 @@ public:
     ~EvacCA() = default;
 
     bool evolve();
-    void show() const;
     void add_people(int people);
 
+    void show() const;
     static EvacCA load_from_pixmap(const std::string &filename);
+
+    // inline methods
+    inline Cell &get_cell(int row, int col) {
+        return cells[row][col];
+    }
+    inline int height() const {
+        return cells.size();
+    }
+    inline int width() const {
+        return cells[0].size();
+    }
 };
 
 #endif

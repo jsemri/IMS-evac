@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
     // reading a pix
     EvacCA ca = EvacCA::load_from_pixmap(argv[opt_cnt]);
     ca.add_people(people);
+    /**/ca.show();
 
     // evolve CA in loop until CA can't change its states
     while (ca.evolve()) {
