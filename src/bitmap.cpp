@@ -92,12 +92,10 @@ EvacCA Bitmap::load(const std::string &filename) {
 		for(int col = 0; col < width; col++) {
 			rgb_t rgb;
 			image.get_pixel(row, col, rgb);
-            ca.get_cell(row, col).cell_type = translate(rgb);
+            ca.cell(row, col).type = translate(rgb);
 		}
 	}
 	
-    // TODO Dijkstra
-
     // Success
 	return ca;
 }
@@ -113,8 +111,7 @@ void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
     for(int row = 0; row < height; row++) {
         for(int col = 0; col < width; col++) {
             // Draw (scaled) cell
-            CellType type = ca.get_cell(row, col).cell_type;
-            pick(pen, type);
+            pick(pen, ca.cell(row, col).type);
             for(unsigned i = 0; i < scale; i++) {
 				for(unsigned j = 0; j < scale; j++) {
 					pixel(pen, row*scale+i, col*scale+j);

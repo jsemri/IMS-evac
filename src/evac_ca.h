@@ -4,47 +4,103 @@
 #include <vector>
 #include <iostream>
 
-// type of a cell
+/** Type of a cell. */
 enum CellType {
-    Empty = 0, Wall, Obstacle, Person, Exit
+    Empty = 0,
+    Exit,
+    Wall,
+    Person
+};
+
+/** Cell structure. */
+struct Cell {
+	/** Cell type. */
+	CellType type;
+	/** Distance to upper border. */
+	int row;
+	/** Distance to left border. */
+	int col;
+	/** Distance (in hops) to nearest exit. */
+	int exit_distance;
+	
+	union {
+		// only for empty cell
+		// the higher number the higher priority
+		int person_occurence_priority;
+		// only for person
+		bool evacuated;
+		// XXX maybe add more properties for other cell types
+	};
+
+	Cell() :
+		type{Empty}, row{-1}, col{-1}, exit_distance{-1}
+	{}
 };
 
 class EvacCA {
 public:
-    // cell structure
-    struct Cell {
-        CellType cell_type;
-        int exit_distance;
-        union {
-            // only for empty cell
-            // the higher number the higher priority
-            int person_occurence_priority;
-            // only for person
-            bool evacuated;
-            // XXX maybe add more properties for other cell types
-        };
+    // XXX some additional parameters may be added later
+    // considered parameters: chaos
+    EvacCA(unsigned height, unsigned width);
+    ~EvacCA() = default;
 
-        Cell() : cell_type{Empty}, exit_distance{-1} {}
-    };
-
-
+	///
+    bool evolve();
+    
+    ///
+    void add_people(int people);
+	
+	/**
+	 * Load model description from a bitmap.
+	 * @param filename name of input file
+	 * @return instance of EvacCA class
+	 * @throw invalid_argument if failed to process input file
+	 * @note loaded model might be populated
+	 */
+    static EvacCA load(const std::string &filename);
+    
+    /// Store model description to "output.bmp".
+	void show();
+    
+    // Inline methods:
+    
+    /// Dimension getter: number of rows
+    inline int height() const {
+        return cells.size();
+    }
+    
+    /// Dimension getter: number of columns
+    inline int width() const {
+        return cells[0].size();
+    }
+	
+	/// Retrieve a cell at a specified position
+    inline Cell& cell(int row, int col) {
+        return cells[row][col];
+    }
+    
 private:
-    // position in matrix
+	/// Position in matrix. 
     using CellPosition = std::pair<size_t, size_t>;
 
-    // 2D matrix of cells
+    /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
-    // positions of the people to evacuate
+    
+    /// Positions of the people to evacuate.
     std::vector<CellPosition> people;
 
+	///
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
 
-    // inline methods
+	/// Recompute exit distances.
+	void recompute_shortest_paths();
+	
+    // Inline methods:
 
     /// returns true if cell at specified position is empty or it is an exit
     inline bool is_empty(size_t row, size_t col) const {
-        return cells[row][col].cell_type == Empty ||
-               cells[row][col].cell_type == Exit; // XXX Exit?
+        return cells[row][col].type == Empty ||
+               cells[row][col].type == Exit; // XXX Exit?
     };
 
     /// push an position(row,col) to the vector if cell at this position is
@@ -66,33 +122,10 @@ private:
     inline int distance(size_t row, size_t col) const {
         return cells[row][col].exit_distance;
     }
-
-    /// return a reference to a cell at specified position
-    inline Cell& get_cell(CellPosition pos) {
-        return cells[pos.first][pos.second];
-    }
-
-public:
-    // XXX some additional parameters may be added later
-    // considered parameters: chaos
-    EvacCA(unsigned x, unsigned y);
-    ~EvacCA() = default;
-
-    bool evolve();
-    void add_people(int people);
-
-    void show() const;
-    static EvacCA load_from_pixmap(const std::string &filename);
-
-    // inline methods
-    inline Cell &get_cell(int row, int col) {
-        return cells[row][col];
-    }
-    inline int height() const {
-        return cells.size();
-    }
-    inline int width() const {
-        return cells[0].size();
+    
+    /// Retrieve a cell at a specified position
+    inline Cell& cell(CellPosition pos) {
+		return cell(pos.first, pos.second);
     }
 };
 

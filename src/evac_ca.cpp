@@ -6,14 +6,15 @@
 #include <cstdlib>
 #include <cassert>
 
+#include <climits>
+#include <queue>
+
 #include "evac_ca.h"
 #include "bitmap.h"
 
-EvacCA::EvacCA(unsigned x, unsigned y) :
+EvacCA::EvacCA(unsigned y, unsigned x) :
     cells(y, std::vector<Cell>(x))
-{
-
-}
+{}
 
 std::vector<EvacCA::CellPosition>
 EvacCA::cell_neighbourhood(CellPosition position) const {
@@ -61,7 +62,7 @@ bool EvacCA::evolve() {
 
     for (auto &i : people) {
 
-        if (get_cell(i).evacuated) {
+        if (cell(i).evacuated) {
             // already evacuated
             continue;
         }
@@ -79,16 +80,16 @@ bool EvacCA::evolve() {
 
             if (distance(dist) < distance(i)) {
                 // move the person
-                get_cell(i) = Cell();
+                cell(i) = Cell();
                 i = dist;
-                get_cell(i).cell_type = Person;
+                cell(i).type = Person;
             }
             // TODO else if chaos
 
             // if value is zero -> leave the system
             if (distance(i) == 0) {
                 // TODO erase from vector? Label as evacuated?
-                get_cell(i).evacuated = true;
+                cell(i).evacuated = true;
             }
         }
     }
@@ -105,7 +106,7 @@ void EvacCA::add_people(int people_count) {
     // mark all cells with possible person appearance
     for (size_t i = 0; i < cells.size(); i++) {
         for (size_t j = 0; j < cells[i].size(); j++) {
-            if (cells[i][j].cell_type == Empty) {
+            if (cells[i][j].type == Empty) {
                 if (cells[i][j].person_occurence_priority > 0) {
                     empty_priority_cells.push_back(CellPosition(i,j));
                 }
@@ -145,10 +146,57 @@ void EvacCA::add_people(int people_count) {
     }
 }
 
-EvacCA EvacCA::load_from_pixmap(const std::string &filename) {
-   	return Bitmap::load(filename);
+EvacCA EvacCA::load(const std::string &filename) {
+	// Load from image
+   	EvacCA ca = Bitmap::load(filename);
+   	
+   	// Resolve distances
+   	int height = ca.height();
+	int width = ca.width();
+		
+   	// Identify exit states
+   	std::queue<CellPosition> exit_states;
+   	for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+			Cell &cell = ca.cells[row][col];;
+			if(cell.type == Exit) {
+				cell.exit_distance = 0;
+				exit_states.push(CellPosition(row, col));
+			} else {
+				cell.exit_distance = UINT_MAX;
+			}
+		}
+	}
+	
+	// Do Dijkstra for each exit state and remember minimum distances
+	while(!exit_states.empty()) {
+		// Extract initial state
+		CellPosition is = exit_states.front();
+		exit_states.pop();
+		
+		// Initialize distances
+		std::vector<int> distances(height * width);
+		for(int i = 0; i < distances.size(); i++) {
+			distances[i] = UINT_MAX;
+		}
+		distances[is.first * height + is.second] = 0;
+		
+		// Vector of visited states
+		std::vector<bool> visited(height * width);
+		for(int i = 0; i < visited.size(); i++) {
+			visited[i] = false;
+		}
+		visited[is.first * height + is.second] = true;
+		
+		// Queue of unprocessed successors
+		std::queue<CellPosition> unprocessed;
+		unprocessed.push(is);
+	}
+	
+	// Success
+   	return ca;
 }
 
-void EvacCA::show() const {
-    Bitmap::store((EvacCA &)*this, "output.bmp");
+void EvacCA::show() {
+    Bitmap::store(*this, "output.bmp");
 }
