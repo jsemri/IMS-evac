@@ -146,7 +146,7 @@ void EvacCA::add_people(int people_count) {
     }
 
     for (auto i : people) {
-        get_cell(i).cell_type = Person;
+        cell(i).type = Person;
     }
 }
 
