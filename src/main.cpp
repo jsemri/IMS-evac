@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
                 return 0;
             case 't':
                 opt_cnt++;
-                delay = 1000 * std::stoi(optarg); // in microseconds
+                delay = 1000 * std::stoi(optarg); // in milliseconds
                 break;
             case 'p':
                 opt_cnt++;
@@ -49,13 +49,15 @@ int main(int argc, char **argv) {
     // reading a pix
     EvacCA ca = EvacCA::load(argv[opt_cnt]);
     ca.add_people(people);
-	
-	/**/ca.show();
-	/**/Bitmap::display_distances(ca);
-	/**/return EXIT_SUCCESS;
-	
 	// evolve CA in loop until CA can't change its states
+	int cnt = 0;
     while (ca.evolve()) {
+        if (cnt++ % 2) {
+            std::cerr << ">>>\n";
+        }
+        else {
+            std::cerr << "<<<\n";
+        }
         // showing the current state of CA
         ca.show();
         if (delay != -1) {
@@ -65,6 +67,7 @@ int main(int argc, char **argv) {
             while(std::getchar() != '\n');
         }
     }
+    ca.show();
 
     // TODO some statistics, plots, etc.
 

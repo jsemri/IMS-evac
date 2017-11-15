@@ -4,13 +4,15 @@
 #include <vector>
 #include <iostream>
 #include <climits>
+#include <cassert>
 
 /** Type of a cell. */
 enum CellType {
     Empty = 0,
     Exit,
     Wall,
-    Person
+    Person,
+    PersonAppearance
 };
 
 /** Cell structure. */
@@ -23,18 +25,10 @@ struct Cell {
 	int col;
 	/** Distance (in hops) to nearest exit. */
 	unsigned exit_distance;
-	
-	union {
-		// only for empty cell
-		// the higher number the higher priority
-		int person_occurence_priority;
-		// only for person
-		bool evacuated;
-		// XXX maybe add more properties for other cell types
-	};
+    // XXX maybe add more properties for other cell types
 
 	Cell() :
-		type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
+        type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
 	{}
 };
 
@@ -47,10 +41,10 @@ public:
 
 	///
     bool evolve();
-    
+
     ///
     void add_people(int people);
-	
+
 	/**
 	 * Load model description from a bitmap.
 	 * @param filename name of input file
@@ -59,56 +53,65 @@ public:
 	 * @note loaded model might be populated
 	 */
     static EvacCA load(const std::string &filename);
-    
+
     /// Store model description to "output.bmp".
 	void show();
-    
+
     // Inline methods:
-    
+
     /// Dimension getter: number of rows
     inline int height() const {
         return cells.size();
     }
-    
+
     /// Dimension getter: number of columns
     inline int width() const {
+        assert(!cells.empty());
         return cells[0].size();
     }
-	
+
 	/// Retrieve a cell at a specified position
     inline Cell& cell(int row, int col) {
         return cells[row][col];
     }
-    
+
 private:
-	/// Position in matrix. 
+	/// Position in matrix.
     using CellPosition = std::pair<size_t, size_t>;
 
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
-    
+
     /// Positions of the people to evacuate.
     std::vector<CellPosition> people;
 
-	///
+    /// Positions of exits.
+    std::vector<CellPosition> exits;
+
+    /// Probability of moving to the cell with same exit distance
+    float chaos;
+
+
+
+	/// Return Moore neighbourhood of empty cells at current position.
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
 
 	/// Recompute exit distances.
 	void recompute_shortest_paths();
-	
+
     // Inline methods:
 
     /// returns true if cell at specified position is empty or it is an exit
     inline bool is_empty(size_t row, size_t col) const {
         return cells[row][col].type == Empty ||
-               cells[row][col].type == Exit; // XXX Exit?
+               cells[row][col].type == Exit;
     };
 
 	/// returns true if cell coordinates are valid
 	inline bool cell_check(int row, int col) const {
 		return row >= 0 && row < height() && col >= 0 && col < width();
 	}
-	
+
     /// push an position(row,col) to the vector if cell at this position is
  	/// empty
  	inline void push_if_empty(
@@ -128,7 +131,7 @@ private:
     inline int distance(size_t row, size_t col) const {
         return cells[row][col].exit_distance;
     }
-    
+
     /// Retrieve a cell at a specified position
     inline Cell& cell(CellPosition pos) {
 		return cell(pos.first, pos.second);
