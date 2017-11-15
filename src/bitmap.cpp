@@ -135,10 +135,10 @@ void Bitmap::display_distances(EvacCA &ca) {
 		for(int col = 0; col < width; col++) {
 			unsigned distance = ca.cell(row,col).exit_distance;
 			rgb_t color;
-			if(distance >= 100) {
+			if(distance >= 200) {
 				color = black;
 			} else {
-				color = jet_colormap[999-distance*10];
+				color = jet_colormap[999-distance*5];
 			}
 			image.set_pixel(col, row, color);
 		}
@@ -196,6 +196,36 @@ void Bitmap::sample_2(int length, const std::string &filename) {
     // Obstacle
     pick(pen, Wall);
     rectangle(pen, width/4, height/4, 3*width/4, 3*height/4);
+    
+    // Output
+    image.save_image(filename);
+}
+
+void Bitmap::sample_3(int length, const std::string &filename) {
+	// Construct image
+    int width = length, height = length;
+    bitmap_image image(width, height);
+	image_drawer pen(image);
+    
+    // White background
+    image.set_all_channels(255, 255, 255);
+
+    // Walls
+    pick(pen, Wall);
+    hline(pen, 0, 0, width-1);
+	hline(pen, height-1, 0, width-1);
+	vline(pen, 0, height-1, 0);
+	vline(pen, 0, height-1, width-1);
+    
+    // Exit
+    pick(pen, Exit);
+    pixel(pen, 0, 0);
+    
+    // Obstacles
+    pick(pen, Wall);
+    rectangle(pen, height/8, width/8, 5*height/8, 2*width/8);
+    rectangle(pen, 6*height/8, 4*width/8, 7*height/8, 7*width/8);
+    rectangle(pen, 2*height/8, 5*width/8, 4*height/8, 7*width/8);
     
     // Output
     image.save_image(filename);

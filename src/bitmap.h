@@ -78,12 +78,19 @@ public:
 	static void sample_1(int length, const std::string &filename);
 
 	/**
- 	 * Produce sample model: square room with one rectable obstacle and two
+ 	 * Produce sample model: square room with one rectangle obstacle and two
  	 * exits.
  	 * @param length room dimensions
  	 * @param filename name of output file
  	 */
 	static void sample_2(int length, const std::string &filename);
+	
+	/**
+	 * Produce sample model: square room, 1 exit, 3 obstacles.
+	 * @param length room dimensions
+ 	 * @param filename name of output file
+ 	 */
+	static void sample_3(int length, const std::string &filename);
 };
 
 #endif

@@ -16,8 +16,7 @@ const char *helpstr =
 "  -p <N>        : number of people to evacuate, default 100\n";
 
 int main(int argc, char **argv) {
-
-    long delay =  -1;   // simulation time
+	long delay =  -1;   // simulation time
     int people = 100;   // persons to evacuate
     int opt_cnt = 1;    // used for locating positional argument
     int c;              // reading the options
