@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <climits>
 
 /** Type of a cell. */
 enum CellType {
@@ -21,7 +22,7 @@ struct Cell {
 	/** Distance to left border. */
 	int col;
 	/** Distance (in hops) to nearest exit. */
-	int exit_distance;
+	unsigned exit_distance;
 	
 	union {
 		// only for empty cell
@@ -33,7 +34,7 @@ struct Cell {
 	};
 
 	Cell() :
-		type{Empty}, row{-1}, col{-1}, exit_distance{-1}
+		type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
 	{}
 };
 

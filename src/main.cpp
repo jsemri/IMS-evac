@@ -4,6 +4,7 @@
 #include <getopt.h>
 
 #include "evac_ca.h"
+#include "bitmap.h"	// remove after debug
 
 const char *helpstr =
 "Program for simulating evacuation of building.\n"
@@ -49,6 +50,9 @@ int main(int argc, char **argv) {
     // reading a pix
     EvacCA ca = EvacCA::load(argv[opt_cnt]);
     ca.add_people(people);
+	
+	/**/ca.show();
+	/**/Bitmap::display_distances(ca);
 	/**/return EXIT_SUCCESS;
 	
 	// evolve CA in loop until CA can't change its states

@@ -65,7 +65,7 @@ public:
 	);
 
 	/**
-	 * Display heat map of exit distances.
+	 * Store heat map of exit distances to "distances.bmp".
 	 * @param ca model to store
 	 */
 	static void display_distances(EvacCA &ca);

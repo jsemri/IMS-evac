@@ -55,7 +55,7 @@ void Bitmap::pick(image_drawer &pen, CellType type) {
 }
 
 void Bitmap::pixel(image_drawer &pen, int row, int col) {
-	pen.plot_pixel(row, col);
+	pen.plot_pixel(col, row);
 }
 
 void Bitmap::hline(image_drawer &pen, int row, int colFrom, int colTo) {
@@ -91,12 +91,12 @@ EvacCA Bitmap::load(const std::string &filename) {
     for(int row = 0; row < height; row++) {
 		for(int col = 0; col < width; col++) {
 			rgb_t rgb;
-			image.get_pixel(row, col, rgb);
-            ca.cell(row, col).type = translate(rgb);
+			image.get_pixel(col, row, rgb);
+            ca.cell(row,col).type = translate(rgb);
 		}
 	}
 	
-    // Success
+	// Success
 	return ca;
 }
 
@@ -105,9 +105,9 @@ void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
     int height = ca.height();
     int width = ca.width();
     bitmap_image image(width*scale, height*scale);
-
+	image_drawer pen(image);
+    
     // Differentiate types
-    image_drawer pen(image);
     for(int row = 0; row < height; row++) {
         for(int col = 0; col < width; col++) {
             // Draw (scaled) cell
@@ -125,8 +125,29 @@ void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
 }
 
 void Bitmap::display_distances(EvacCA &ca) {
-	store(ca, "distances.bmp", 10);
+	 // Construct image
+    int height = ca.height();
+    int width = ca.width();
+    bitmap_image image(width, height);
+    
+    // Construct heat map
+    for(int row = 0; row < height; row++) {
+		for(int col = 0; col < width; col++) {
+			unsigned distance = ca.cell(row,col).exit_distance;
+			rgb_t color;
+			if(distance >= 100) {
+				color = black;
+			} else {
+				color = jet_colormap[999-distance*10];
+			}
+			image.set_pixel(col, row, color);
+		}
+	}
+	
+	// Output
+    image.save_image("distances.bmp");
 }
+
 void Bitmap::sample_1(int length, const std::string &filename) {
     // Construct image
 	int width = length, height = length;
