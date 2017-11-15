@@ -21,35 +21,16 @@ EvacCA::cell_neighbourhood(CellPosition position) const {
     std::vector<CellPosition> neighbours;
     size_t row = position.first;
     size_t col = position.second;
-    size_t max_row = cells.size();
-    size_t max_col = cells[0].size();
-
-    if (row != 0) {
-        push_if_empty(neighbours, row - 1, col);
-    }
-
-    if (row != max_row) {
-        push_if_empty(neighbours, row + 1, col);
-    }
-
-    if (col != 0) {
-        push_if_empty(neighbours, row, col - 1);
-    }
-
-    if (col != max_col) {
-        push_if_empty(neighbours, row, col + 1);
-    }
-
-    if (col != 0 && row != 0) {
-        push_if_empty(neighbours, row - 1, col - 1);
-        push_if_empty(neighbours, row - 1, col - 1);
-    }
-
-    if (col != max_col && row != max_row) {
-        push_if_empty(neighbours, row + 1, col + 1);
-        push_if_empty(neighbours, row + 1, col + 1);
-    }
-
+    
+	push_if_empty(neighbours, row - 1, col - 1);
+	push_if_empty(neighbours, row - 1, col);
+	push_if_empty(neighbours, row - 1, col + 1);
+	push_if_empty(neighbours, row, col - 1);
+	push_if_empty(neighbours, row, col + 1);
+	push_if_empty(neighbours, row + 1, col - 1);
+	push_if_empty(neighbours, row + 1, col);
+	push_if_empty(neighbours, row + 1, col + 1);
+    
     return neighbours;
 }
 
@@ -150,24 +131,17 @@ void EvacCA::add_people(int people_count) {
     }
 }
 
-EvacCA EvacCA::load(const std::string &filename) {
-	// Load from image
-   	EvacCA ca = Bitmap::load(filename);
-   	
-   	// Resolve distances
-   	int height = ca.height();
-	int width = ca.width();
-		
-   	// Identify exit states
+void EvacCA::recompute_shortest_paths() {
+	// Identify exit states
    	std::queue<CellPosition> exit_states;
-   	for (int row = 0; row < height; row++) {
-        for (int col = 0; col < width; col++) {
-			Cell &cell = ca.cells[row][col];;
-			if(cell.type == Exit) {
-				cell.exit_distance = 0;
+   	for (int row = 0; row < height(); row++) {
+        for (int col = 0; col < width(); col++) {
+			Cell &c = cell(row, col);
+			if(c.type == Exit) {
+				c.exit_distance = 0;
 				exit_states.push(CellPosition(row, col));
 			} else {
-				cell.exit_distance = UINT_MAX;
+				c.exit_distance = UINT_MAX;
 			}
 		}
 	}
@@ -179,24 +153,54 @@ EvacCA EvacCA::load(const std::string &filename) {
 		exit_states.pop();
 		
 		// Initialize distances
-		std::vector<int> distances(height * width);
+		std::vector<int> distances(height() * width());
 		for(int i = 0; i < distances.size(); i++) {
 			distances[i] = UINT_MAX;
 		}
-		distances[is.first * height + is.second] = 0;
+		distances[is.first * height() + is.second] = 0;
 		
 		// Vector of visited states
-		std::vector<bool> visited(height * width);
+		std::vector<bool> visited(height() * width());
 		for(int i = 0; i < visited.size(); i++) {
 			visited[i] = false;
 		}
-		visited[is.first * height + is.second] = true;
 		
 		// Queue of unprocessed successors
 		std::queue<CellPosition> unprocessed;
 		unprocessed.push(is);
+		
+		// Compute distances
+		while(!unprocessed.empty()) {
+			// Extract unprocessed
+			CellPosition current = unprocessed.front();
+			unprocessed.pop();
+			visited[current.first * height() + current.second] = true;
+			int current_distance = distances[current.first * height() + current.second];
+			
+			// Generate successors
+			std::vector<CellPosition> successors = cell_neighbourhood(current);
+			for(CellPosition successor: successors) {
+				// Skip processed successors, update distance
+				int tr = successor.first * height() + successor.second;
+				if(!visited[tr]) {
+					visited[tr] = true;
+					if(current_distance + 1 < distances[tr]) {
+						distances[tr] = current_distance + 1;
+					}
+					unprocessed.push(successor);
+				}
+			}
+		}
 	}
-	
+}
+
+EvacCA EvacCA::load(const std::string &filename) {
+	// Load from image
+   	EvacCA ca = Bitmap::load(filename);
+   	
+   	// Resolve distances
+   	ca.recompute_shortest_paths();
+   	
 	// Success
    	return ca;
 }

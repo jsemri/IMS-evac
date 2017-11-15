@@ -124,6 +124,9 @@ void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
     image.save_image(filename);
 }
 
+void Bitmap::display_distances(EvacCA &ca) {
+	store(ca, "distances.bmp", 10);
+}
 void Bitmap::sample_1(int length, const std::string &filename) {
     // Construct image
 	int width = length, height = length;

@@ -65,6 +65,12 @@ public:
 	);
 
 	/**
+	 * Display heat map of exit distances.
+	 * @param ca model to store
+	 */
+	static void display_distances(EvacCA &ca);
+	
+	/**
  	 * Produce sample model: square room with one exit.
  	 * @param length room dimensions
  	 * @param filename name of output file

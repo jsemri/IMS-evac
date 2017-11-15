@@ -103,12 +103,17 @@ private:
                cells[row][col].type == Exit; // XXX Exit?
     };
 
+	/// returns true if cell coordinates are valid
+	inline bool cell_check(int row, int col) const {
+		return row >= 0 && row < height() && col >= 0 && col < width();
+	}
+	
     /// push an position(row,col) to the vector if cell at this position is
  	/// empty
  	inline void push_if_empty(
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
-        if (is_empty(row, col)) {
+        if (cell_check(row, col) && is_empty(row, col)) {
             vec.push_back(CellPosition(row, col));
         }
     }
