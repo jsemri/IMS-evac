@@ -144,6 +144,10 @@ void EvacCA::add_people(int people_count) {
         people.push_back(empty_cells.back());
         empty_cells.pop_back();
     }
+
+    for (auto i : people) {
+        get_cell(i).cell_type = Person;
+    }
 }
 
 EvacCA EvacCA::load(const std::string &filename) {
