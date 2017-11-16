@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "evac_ca.h"
+#include "evacuation.h"
 #include "bitmap.h"	// remove after debug
 
 const char *helpstr =
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     }
 
     // reading a pix
-    EvacCA ca = EvacCA::load(argv[opt_cnt]);
+    Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
     ca.add_people(people);
 	// evolve CA in loop until CA can't change its states
 	int cnt = 0;

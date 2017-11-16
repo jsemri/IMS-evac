@@ -9,15 +9,17 @@
 #include <climits>
 #include <queue>
 
-#include "evac_ca.h"
+#include "evacuation.h"
 #include "bitmap.h"
 
-EvacCA::EvacCA(unsigned y, unsigned x) :
+using namespace Evacuation;
+
+CA::CA(unsigned y, unsigned x) :
     cells(y, std::vector<Cell>(x))
 {}
 
-std::vector<EvacCA::CellPosition>
-EvacCA::cell_neighbourhood(CellPosition position) const {
+std::vector<CA::CellPosition>
+CA::cell_neighbourhood(CellPosition position) const {
     std::vector<CellPosition> neighbours;
     size_t row = position.first;
     size_t col = position.second;
@@ -34,7 +36,7 @@ EvacCA::cell_neighbourhood(CellPosition position) const {
     return neighbours;
 }
 
-bool EvacCA::evolve() {
+bool CA::evolve() {
 
     bool res = !people.empty();
     // remove people at exits
@@ -84,7 +86,7 @@ bool EvacCA::evolve() {
 }
 
 // somehow distribute people over empty cells
-void EvacCA::add_people(int people_count) {
+void CA::add_people(int people_count) {
 
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
@@ -134,7 +136,7 @@ void EvacCA::add_people(int people_count) {
     }
 }
 
-void EvacCA::recompute_shortest_paths() {
+void CA::recompute_shortest_paths() {
 	// Identify exit states
    	std::queue<CellPosition> exit_states;
    	for (int row = 0; row < height(); row++) {
@@ -211,9 +213,9 @@ void EvacCA::recompute_shortest_paths() {
 	}
 }
 
-EvacCA EvacCA::load(const std::string &filename) {
+CA CA::load(const std::string &filename) {
 	// Load from image
-   	EvacCA ca = Bitmap::load(filename);
+   	CA ca = Bitmap::load(filename);
 
    	// Resolve distances
    	ca.recompute_shortest_paths();
@@ -222,6 +224,6 @@ EvacCA EvacCA::load(const std::string &filename) {
    	return ca;
 }
 
-void EvacCA::show() {
+void CA::show() {
     Bitmap::store(*this, "output.bmp");
 }

@@ -1,10 +1,12 @@
-#ifndef __evac_ca_h
-#define __evac_ca_h
+#ifndef __evacuation_h
+#define __evacuation_h
 
 #include <vector>
 #include <iostream>
 #include <climits>
 #include <cassert>
+
+namespace Evacuation {
 
 /** Type of a cell. */
 enum CellType {
@@ -32,12 +34,12 @@ struct Cell {
 	{}
 };
 
-class EvacCA {
+class CA {
 public:
     // XXX some additional parameters may be added later
     // considered parameters: chaos
-    EvacCA(unsigned height, unsigned width);
-    ~EvacCA() = default;
+    CA(unsigned height, unsigned width);
+    ~CA() = default;
 
 	///
     bool evolve();
@@ -48,11 +50,11 @@ public:
 	/**
 	 * Load model description from a bitmap.
 	 * @param filename name of input file
-	 * @return instance of EvacCA class
+	 * @return instance of CA class
 	 * @throw invalid_argument if failed to process input file
 	 * @note loaded model might be populated
 	 */
-    static EvacCA load(const std::string &filename);
+    static CA load(const std::string &filename);
 
     /// Store model description to "output.bmp".
 	void show();
@@ -137,5 +139,6 @@ private:
 		return cell(pos.first, pos.second);
     }
 };
+} // end of namespace
 
 #endif

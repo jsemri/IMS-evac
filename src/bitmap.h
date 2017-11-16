@@ -7,7 +7,7 @@
 #ifndef __bitmap_h
 #define __bitmap_h
 
-#include "evac_ca.h"
+#include "evacuation.h"
 #include "bitmap_image.hpp"
 
 /**
@@ -22,23 +22,23 @@ class Bitmap {
 private:
 
 	/** Translate cell type to color; unknown types are translated to black. */
-	static rgb_t translate(CellType type);
+	static rgb_t translate(Evacuation::CellType type);
 
 	/** Translate color to cell type; unknown colors are translated to Wall. */
-	static CellType translate(rgb_t rgb);
+	static Evacuation::CellType translate(rgb_t rgb);
 
 	/** Pick cell type color and set a drawer. */
-	static void pick(image_drawer &drawer, CellType type);
-	
+	static void pick(image_drawer &drawer, Evacuation::CellType type);
+
 	/** Draw cell.*/
 	static void pixel(image_drawer &pen, int row, int col);
-	
+
 	/** Draw horizontal line. */
 	static void hline(image_drawer &pen, int row, int colFrom, int colTo);
-	
+
 	/** Draw vertical line. */
 	static void vline(image_drawer &pen, int rowFrom, int rowTo, int col);
-	
+
 	/** Draw rectangle. */
 	static void rectangle(
 		image_drawer &pen, int rowFrom, int colFrom, int rowTo, int colTo
@@ -48,11 +48,11 @@ public:
 	/**
 	 * Load model description from a bitmap.
 	 * @param filename name of input file
-	 * @return instance of EvacCA class
+	 * @return instance of Evacuation::CA class
 	 * @throw invalid_argument if failed to process input file
 	 * @note loaded model might be populated
 	 */
-	static EvacCA load(const std::string &filename);
+	static Evacuation::CA load(const std::string &filename);
 
 	/**
 	 * Store model description to a bitmap.
@@ -61,15 +61,15 @@ public:
 	 * @param scale blow image up
 	 */
 	static void store(
-		EvacCA &ca, const std::string &filename, unsigned scale = 10
+		Evacuation::CA &ca, const std::string &filename, unsigned scale = 10
 	);
 
 	/**
 	 * Store heat map of exit distances to "distances.bmp".
 	 * @param ca model to store
 	 */
-	static void display_distances(EvacCA &ca);
-	
+	static void display_distances(Evacuation::CA &ca);
+
 	/**
  	 * Produce sample model: square room with one exit.
  	 * @param length room dimensions
@@ -84,7 +84,7 @@ public:
  	 * @param filename name of output file
  	 */
 	static void sample_2(int length, const std::string &filename);
-	
+
 	/**
 	 * Produce sample model: square room, 1 exit, 3 obstacles.
 	 * @param length room dimensions

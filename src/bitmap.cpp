@@ -4,10 +4,12 @@
  * @author xandri03
  */
 
-#include "bitmap.h" 
-#include "evac_ca.h"
+#include "bitmap.h"
+#include "evacuation.h"
 
 #include "bitmap_image.hpp" // bitmap library
+
+using namespace Evacuation;
 
 // Predefined colors
 constexpr rgb_t black = {0, 0, 0};
@@ -74,7 +76,7 @@ void Bitmap::rectangle(
 	}
 }
 
-EvacCA Bitmap::load(const std::string &filename) {
+CA Bitmap::load(const std::string &filename) {
 	// Open file
 	bitmap_image image(filename);
 	if(!image) {
@@ -85,8 +87,8 @@ EvacCA Bitmap::load(const std::string &filename) {
 	// Read dimensions
 	int height = image.height();
     int width = image.width();
-	EvacCA ca(height, width);
-	
+	CA ca(height, width);
+
    // Differentiate colors
     for(int row = 0; row < height; row++) {
 		for(int col = 0; col < width; col++) {
@@ -95,18 +97,18 @@ EvacCA Bitmap::load(const std::string &filename) {
             ca.cell(row,col).type = translate(rgb);
 		}
 	}
-	
+
 	// Success
 	return ca;
 }
 
-void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
+void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
     // Construct image
     int height = ca.height();
     int width = ca.width();
     bitmap_image image(width*scale, height*scale);
 	image_drawer pen(image);
-    
+
     // Differentiate types
     for(int row = 0; row < height; row++) {
         for(int col = 0; col < width; col++) {
@@ -119,17 +121,17 @@ void Bitmap::store(EvacCA &ca, const std::string &filename, unsigned scale){
 			}
         }
     }
-    
+
     // Output
     image.save_image(filename);
 }
 
-void Bitmap::display_distances(EvacCA &ca) {
+void Bitmap::display_distances(CA &ca) {
 	 // Construct image
     int height = ca.height();
     int width = ca.width();
     bitmap_image image(width, height);
-    
+
     // Construct heat map
     for(int row = 0; row < height; row++) {
 		for(int col = 0; col < width; col++) {
@@ -143,7 +145,7 @@ void Bitmap::display_distances(EvacCA &ca) {
 			image.set_pixel(col, row, color);
 		}
 	}
-	
+
 	// Output
     image.save_image("distances.bmp");
 }
@@ -156,18 +158,18 @@ void Bitmap::sample_1(int length, const std::string &filename) {
 
     // White background
     image.set_all_channels(255, 255, 255);
-	
+
 	// Walls
 	pick(pen, Wall);
 	hline(pen, 0, 0, width-1);
 	hline(pen, height-1, 0, width-1);
 	vline(pen, 0, height-1, 0);
 	vline(pen, 0, height-1, width-1);
-	
+
 	// Exit
 	pick(pen, Exit);
 	pixel(pen, width/2, 0);
-	
+
 	// Output
 	image.save_image(filename);
 }
@@ -177,7 +179,7 @@ void Bitmap::sample_2(int length, const std::string &filename) {
     int width = length, height = length;
     bitmap_image image(width, height);
 	image_drawer pen(image);
-    
+
     // White background
     image.set_all_channels(255, 255, 255);
 
@@ -187,16 +189,16 @@ void Bitmap::sample_2(int length, const std::string &filename) {
 	hline(pen, height-1, 0, width-1);
 	vline(pen, 0, height-1, 0);
 	vline(pen, 0, height-1, width-1);
-    
+
     // Exits
     pick(pen, Exit);
     pixel(pen, width/2, 0);
     pixel(pen, width/2, height-1);
-    
+
     // Obstacle
     pick(pen, Wall);
     rectangle(pen, width/4, height/4, 3*width/4, 3*height/4);
-    
+
     // Output
     image.save_image(filename);
 }
@@ -206,7 +208,7 @@ void Bitmap::sample_3(int length, const std::string &filename) {
     int width = length, height = length;
     bitmap_image image(width, height);
 	image_drawer pen(image);
-    
+
     // White background
     image.set_all_channels(255, 255, 255);
 
@@ -216,17 +218,17 @@ void Bitmap::sample_3(int length, const std::string &filename) {
 	hline(pen, height-1, 0, width-1);
 	vline(pen, 0, height-1, 0);
 	vline(pen, 0, height-1, width-1);
-    
+
     // Exit
     pick(pen, Exit);
     pixel(pen, 0, 0);
-    
+
     // Obstacles
     pick(pen, Wall);
     rectangle(pen, height/8, width/8, 5*height/8, 2*width/8);
     rectangle(pen, 6*height/8, 4*width/8, 7*height/8, 7*width/8);
     rectangle(pen, 2*height/8, 5*width/8, 4*height/8, 7*width/8);
-    
+
     // Output
     image.save_image(filename);
 }
