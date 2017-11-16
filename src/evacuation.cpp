@@ -13,6 +13,12 @@
 #include "evacuation.h"
 #include "bitmap.h"
 
+#define shuffle(arr) \
+    std::random_shuffle(arr.begin(), arr.end())
+
+#define RAND (((double) rand()) / (RAND_MAX))
+#define PROB(val) val > RAND
+
 using namespace Evacuation;
 
 CA::CA(unsigned y, unsigned x) :
@@ -46,29 +52,33 @@ bool CA::evolve() {
     }
 
     std::vector<size_t> to_erase;
-
-    std::random_shuffle(
-        people.begin(), people.end(),
-        [](int i) { return std::rand() % i;});
+    shuffle(people);
 
     for (size_t i = 0; i < people.size(); i++) {
         auto &person = people[i];
         auto neighbours = cell_neighbourhood(person);
-        // find min value
+        shuffle(neighbours);
         if (!neighbours.empty()) {
-            auto next_cell = *std::min_element(
-                neighbours.begin(), neighbours.end(),
-                [this](const CellPosition a, const CellPosition b) {
-                    return distance(a) < distance(b);
-                });
+            // find min value
+            CellPosition next_cell = neighbours[0];
+            for (auto c : neighbours) {
+                if (distance(next_cell) > distance(c)) {
+                    next_cell = c;
+                }
+            }
 
-            if (distance(next_cell) < distance(person)) {
+            // distance to the next cell
+            int diff = distance(person) - distance(next_cell);
+            // XXX this must hold
+            assert (diff == 0 || diff == -1 || diff == 1);
+            // move to the cell with lesser exit distance or same distance
+            // with some probability
+            if (diff == 1 || (diff == 0 && PROB(0.02))) {
                 // move the person
                 cell(person).type = Empty;
                 person = next_cell;
                 cell(person).type = Person;
             }
-            // TODO else if chaos
 
             if (distance(person) == 0) {
                 to_erase.push_back(i);
@@ -110,15 +120,8 @@ void CA::add_people(int people_count) {
         throw std::logic_error("cannot have more people than empty cells");
     }
 
-    std::srand(std::time(0));
-    std::random_shuffle(
-        empty_priority_cells.begin(),
-        empty_priority_cells.end(),
-        [](int i) { return std::rand() % i;});
-
-    std::random_shuffle(
-        empty_cells.begin(), empty_cells.end(),
-        [](int i) { return std::rand() % i;});
+    shuffle(empty_priority_cells);
+    shuffle(empty_cells);
 
     // placing people according to priority
     while (!empty_priority_cells.empty() && people_count-- > 0) {
@@ -197,7 +200,7 @@ void CA::recompute_shortest_paths() {
 					cp_min = unprocessed[min];
 				}
 			}
-			
+
 			// Extract minimum
             CellPosition current = unprocessed[min];
 			unprocessed[min] = unprocessed.back();
@@ -234,13 +237,13 @@ void CA::recompute_shortest_paths() {
 
 CA CA::load(const std::string &filename) {
     // Load from image
-   CA ca = Bitmap::load(filename);
+    CA ca = Bitmap::load(filename);
 
-   // Resolve distances
-   ca.recompute_shortest_paths();
+    // Resolve distances
+    ca.recompute_shortest_paths();
 
     // Success
-   return ca;
+    return ca;
 }
 
 void CA::show() {

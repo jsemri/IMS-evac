@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 
 #include <unistd.h>
 #include <getopt.h>
@@ -49,16 +50,14 @@ int main(int argc, char **argv) {
     // reading a pix
     Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
     ca.add_people(people);
-    
+    // uncoment for displaying heat map
+//    Bitmap::display_distances(ca);
+    // uncoment this for opening image with xdg-open
+//    std::system("xdg-open output.bmp");
+
+    std::srand(std::time(0));
     // evolve CA in loop until CA can't change its states
-    int cnt = 0;
     while (ca.evolve()) {
-        if (cnt++ % 2) {
-            std::cerr << ">>>\n";
-        }
-        else {
-            std::cerr << "<<<\n";
-        }
         // showing the current state of CA
         ca.show();
         if (delay != -1) {
