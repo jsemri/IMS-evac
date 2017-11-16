@@ -4,7 +4,7 @@
 #include <getopt.h>
 
 #include "evacuation.h"
-#include "bitmap.h"	// remove after debug
+#include "bitmap.h"    // remove after debug
 
 const char *helpstr =
 "Program for simulating evacuation of building.\n"
@@ -16,7 +16,7 @@ const char *helpstr =
 "  -p <N>        : number of people to evacuate, default 100\n";
 
 int main(int argc, char **argv) {
-	long delay =  -1;   // simulation time
+    long delay =  -1;   // simulation time
     int people = 100;   // persons to evacuate
     int opt_cnt = 1;    // used for locating positional argument
     int c;              // reading the options
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
     // reading a pix
     Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
     ca.add_people(people);
-	// evolve CA in loop until CA can't change its states
-	int cnt = 0;
+    // evolve CA in loop until CA can't change its states
+    int cnt = 0;
     while (ca.evolve()) {
         if (cnt++ % 2) {
             std::cerr << ">>>\n";

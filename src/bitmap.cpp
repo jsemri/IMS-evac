@@ -57,49 +57,49 @@ void Bitmap::pick(image_drawer &pen, CellType type) {
 }
 
 void Bitmap::pixel(image_drawer &pen, int row, int col) {
-	pen.plot_pixel(col, row);
+    pen.plot_pixel(col, row);
 }
 
 void Bitmap::hline(image_drawer &pen, int row, int colFrom, int colTo) {
-	pen.horiztonal_line_segment(colFrom, colTo+1, row);
+    pen.horiztonal_line_segment(colFrom, colTo+1, row);
 }
 
 void Bitmap::vline(image_drawer &pen, int rowFrom, int rowTo, int col) {
-	pen.vertical_line_segment(rowFrom, rowTo+1, col);
+    pen.vertical_line_segment(rowFrom, rowTo+1, col);
 }
 
 void Bitmap::rectangle(
-	image_drawer &pen, int rowFrom, int colFrom, int rowTo, int colTo
+    image_drawer &pen, int rowFrom, int colFrom, int rowTo, int colTo
 ) {
-	for(int row = rowFrom; row <= rowTo; row++) {
-		hline(pen, row, colFrom, colTo);
-	}
+    for(int row = rowFrom; row <= rowTo; row++) {
+        hline(pen, row, colFrom, colTo);
+    }
 }
 
 CA Bitmap::load(const std::string &filename) {
-	// Open file
-	bitmap_image image(filename);
-	if(!image) {
-		// Could not open file
-		throw std::invalid_argument("could not open input file");
-	}
+    // Open file
+    bitmap_image image(filename);
+    if(!image) {
+        // Could not open file
+        throw std::invalid_argument("could not open input file");
+    }
 
-	// Read dimensions
-	int height = image.height();
+    // Read dimensions
+    int height = image.height();
     int width = image.width();
-	CA ca(height, width);
+    CA ca(height, width);
 
    // Differentiate colors
     for(int row = 0; row < height; row++) {
-		for(int col = 0; col < width; col++) {
-			rgb_t rgb;
-			image.get_pixel(col, row, rgb);
+        for(int col = 0; col < width; col++) {
+            rgb_t rgb;
+            image.get_pixel(col, row, rgb);
             ca.cell(row,col).type = translate(rgb);
-		}
-	}
+        }
+    }
 
-	// Success
-	return ca;
+    // Success
+    return ca;
 }
 
 void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
@@ -107,7 +107,7 @@ void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
     int height = ca.height();
     int width = ca.width();
     bitmap_image image(width*scale, height*scale);
-	image_drawer pen(image);
+    image_drawer pen(image);
 
     // Differentiate types
     for(int row = 0; row < height; row++) {
@@ -115,10 +115,10 @@ void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
             // Draw (scaled) cell
             pick(pen, ca.cell(row, col).type);
             for(unsigned i = 0; i < scale; i++) {
-				for(unsigned j = 0; j < scale; j++) {
-					pixel(pen, row*scale+i, col*scale+j);
-				}
-			}
+                for(unsigned j = 0; j < scale; j++) {
+                    pixel(pen, row*scale+i, col*scale+j);
+                }
+            }
         }
     }
 
@@ -127,58 +127,34 @@ void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
 }
 
 void Bitmap::display_distances(CA &ca) {
-	 // Construct image
+     // Construct image
     int height = ca.height();
     int width = ca.width();
     bitmap_image image(width, height);
 
     // Construct heat map
     for(int row = 0; row < height; row++) {
-		for(int col = 0; col < width; col++) {
-			unsigned distance = ca.cell(row,col).exit_distance;
-			rgb_t color;
-			if(distance >= 200) {
-				color = black;
-			} else {
-				color = jet_colormap[999-distance*5];
-			}
-			image.set_pixel(col, row, color);
-		}
-	}
+        for(int col = 0; col < width; col++) {
+            unsigned distance = ca.cell(row,col).exit_distance;
+            rgb_t color;
+            if(distance >= 200) {
+                color = black;
+            } else {
+                color = jet_colormap[999-distance*5];
+            }
+            image.set_pixel(col, row, color);
+        }
+    }
 
-	// Output
+    // Output
     image.save_image("distances.bmp");
 }
 
 void Bitmap::sample_1(int length, const std::string &filename) {
     // Construct image
-	int width = length, height = length;
-	bitmap_image image(width, height);
-	image_drawer pen(image);
-
-    // White background
-    image.set_all_channels(255, 255, 255);
-
-	// Walls
-	pick(pen, Wall);
-	hline(pen, 0, 0, width-1);
-	hline(pen, height-1, 0, width-1);
-	vline(pen, 0, height-1, 0);
-	vline(pen, 0, height-1, width-1);
-
-	// Exit
-	pick(pen, Exit);
-	pixel(pen, width/2, 0);
-
-	// Output
-	image.save_image(filename);
-}
-
-void Bitmap::sample_2(int length, const std::string &filename) {
-    // Construct image
     int width = length, height = length;
     bitmap_image image(width, height);
-	image_drawer pen(image);
+    image_drawer pen(image);
 
     // White background
     image.set_all_channels(255, 255, 255);
@@ -186,9 +162,33 @@ void Bitmap::sample_2(int length, const std::string &filename) {
     // Walls
     pick(pen, Wall);
     hline(pen, 0, 0, width-1);
-	hline(pen, height-1, 0, width-1);
-	vline(pen, 0, height-1, 0);
-	vline(pen, 0, height-1, width-1);
+    hline(pen, height-1, 0, width-1);
+    vline(pen, 0, height-1, 0);
+    vline(pen, 0, height-1, width-1);
+
+    // Exit
+    pick(pen, Exit);
+    pixel(pen, width/2, 0);
+
+    // Output
+    image.save_image(filename);
+}
+
+void Bitmap::sample_2(int length, const std::string &filename) {
+    // Construct image
+    int width = length, height = length;
+    bitmap_image image(width, height);
+    image_drawer pen(image);
+
+    // White background
+    image.set_all_channels(255, 255, 255);
+
+    // Walls
+    pick(pen, Wall);
+    hline(pen, 0, 0, width-1);
+    hline(pen, height-1, 0, width-1);
+    vline(pen, 0, height-1, 0);
+    vline(pen, 0, height-1, width-1);
 
     // Exits
     pick(pen, Exit);
@@ -204,10 +204,10 @@ void Bitmap::sample_2(int length, const std::string &filename) {
 }
 
 void Bitmap::sample_3(int length, const std::string &filename) {
-	// Construct image
+    // Construct image
     int width = length, height = length;
     bitmap_image image(width, height);
-	image_drawer pen(image);
+    image_drawer pen(image);
 
     // White background
     image.set_all_channels(255, 255, 255);
@@ -215,9 +215,9 @@ void Bitmap::sample_3(int length, const std::string &filename) {
     // Walls
     pick(pen, Wall);
     hline(pen, 0, 0, width-1);
-	hline(pen, height-1, 0, width-1);
-	vline(pen, 0, height-1, 0);
-	vline(pen, 0, height-1, width-1);
+    hline(pen, height-1, 0, width-1);
+    vline(pen, 0, height-1, 0);
+    vline(pen, 0, height-1, width-1);
 
     // Exit
     pick(pen, Exit);

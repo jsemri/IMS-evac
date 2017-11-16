@@ -24,14 +24,14 @@ CA::cell_neighbourhood(CellPosition position) const {
     size_t row = position.first;
     size_t col = position.second;
 
-	push_if_empty(neighbours, row - 1, col - 1);
-	push_if_empty(neighbours, row - 1, col);
-	push_if_empty(neighbours, row - 1, col + 1);
-	push_if_empty(neighbours, row, col - 1);
-	push_if_empty(neighbours, row, col + 1);
-	push_if_empty(neighbours, row + 1, col - 1);
-	push_if_empty(neighbours, row + 1, col);
-	push_if_empty(neighbours, row + 1, col + 1);
+    push_if_empty(neighbours, row - 1, col - 1);
+    push_if_empty(neighbours, row - 1, col);
+    push_if_empty(neighbours, row - 1, col + 1);
+    push_if_empty(neighbours, row, col - 1);
+    push_if_empty(neighbours, row, col + 1);
+    push_if_empty(neighbours, row + 1, col - 1);
+    push_if_empty(neighbours, row + 1, col);
+    push_if_empty(neighbours, row + 1, col + 1);
 
     return neighbours;
 }
@@ -137,91 +137,91 @@ void CA::add_people(int people_count) {
 }
 
 void CA::recompute_shortest_paths() {
-	// Identify exit states
-   	std::queue<CellPosition> exit_states;
-   	for (int row = 0; row < height(); row++) {
+    // Identify exit states
+    std::queue<CellPosition> exit_states;
+    for (int row = 0; row < height(); row++) {
         for (int col = 0; col < width(); col++) {
-			Cell &c = cell(row, col);
-			if(c.type == Exit) {
-				c.exit_distance = 0;
-				exit_states.push(CellPosition(row, col));
-			} else {
-				c.exit_distance = UINT_MAX;
-			}
-		}
-	}
+            Cell &c = cell(row, col);
+            if(c.type == Exit) {
+                c.exit_distance = 0;
+                exit_states.push(CellPosition(row, col));
+            } else {
+                c.exit_distance = UINT_MAX;
+            }
+        }
+    }
 
-	// Apply Dijkstra for each exit state and remember minimum distances
-	while(!exit_states.empty()) {
-		// Extract initial state
-		CellPosition is = exit_states.front();
-		exit_states.pop();
+    // Apply Dijkstra for each exit state and remember minimum distances
+    while(!exit_states.empty()) {
+        // Extract initial state
+        CellPosition is = exit_states.front();
+        exit_states.pop();
 
-		// Initialize distances
-		std::vector<std::vector<unsigned>> distances(height(), std::vector<unsigned>(width()));
-		for (int row = 0; row < height(); row++) {
-			for (int col = 0; col < width(); col++) {
-				distances[row][col] = UINT_MAX;
-			}
-		}
-		distances[is.first][is.second] = 0;
+        // Initialize distances
+        std::vector<std::vector<unsigned>> distances(height(), std::vector<unsigned>(width()));
+        for (int row = 0; row < height(); row++) {
+            for (int col = 0; col < width(); col++) {
+                distances[row][col] = UINT_MAX;
+            }
+        }
+        distances[is.first][is.second] = 0;
 
-		// Vector of visited states
-		std::vector<std::vector<bool>> visited(height(), std::vector<bool>(width()));
-		for (int row = 0; row < height(); row++) {
-			for (int col = 0; col < width(); col++) {
-				visited[row][col] = false;
-			}
-		}
+        // Vector of visited states
+        std::vector<std::vector<bool>> visited(height(), std::vector<bool>(width()));
+        for (int row = 0; row < height(); row++) {
+            for (int col = 0; col < width(); col++) {
+                visited[row][col] = false;
+            }
+        }
 
-		// Queue of unprocessed successors
-		std::queue<CellPosition> unprocessed;
-		unprocessed.push(is);
+        // Queue of unprocessed successors
+        std::queue<CellPosition> unprocessed;
+        unprocessed.push(is);
 
-		// Compute distances
-		while(!unprocessed.empty()) {
-			// Extract unprocessed
-			CellPosition current = unprocessed.front();
-			unprocessed.pop();
-			visited[current.first][current.second] = true;
-			int current_distance = distances[current.first][current.second];
+        // Compute distances
+        while(!unprocessed.empty()) {
+            // Extract unprocessed
+            CellPosition current = unprocessed.front();
+            unprocessed.pop();
+            visited[current.first][current.second] = true;
+            int current_distance = distances[current.first][current.second];
 
-			// Generate successors
-			std::vector<CellPosition> successors = cell_neighbourhood(current);
-			for(CellPosition successor: successors) {
-				// Skip processed successors, update distance
-				int r = successor.first, c = successor.second;
-				if(!visited[r][c]) {
-					visited[r][c] = true;
-					if(current_distance + 1 < distances[r][c]) {
-						distances[r][c] = current_distance + 1;
-					}
-					unprocessed.push(successor);
-				}
-			}
-		}
+            // Generate successors
+            std::vector<CellPosition> successors = cell_neighbourhood(current);
+            for(CellPosition successor: successors) {
+                // Skip processed successors, update distance
+                int r = successor.first, c = successor.second;
+                if(!visited[r][c]) {
+                    visited[r][c] = true;
+                    if(current_distance + 1 < distances[r][c]) {
+                        distances[r][c] = current_distance + 1;
+                    }
+                    unprocessed.push(successor);
+                }
+            }
+        }
 
-		// Pick best distance
-		for(int row = 0; row < height(); row++) {
-			for(int col = 0; col < width(); col++) {
-				Cell &c = cell(row, col);
-				if(distances[row][col] < c.exit_distance) {
-					c.exit_distance = distances[row][col];
-				}
-			}
-		}
-	}
+        // Pick best distance
+        for(int row = 0; row < height(); row++) {
+            for(int col = 0; col < width(); col++) {
+                Cell &c = cell(row, col);
+                if(distances[row][col] < c.exit_distance) {
+                    c.exit_distance = distances[row][col];
+                }
+            }
+        }
+    }
 }
 
 CA CA::load(const std::string &filename) {
-	// Load from image
-   	CA ca = Bitmap::load(filename);
+    // Load from image
+   CA ca = Bitmap::load(filename);
 
-   	// Resolve distances
-   	ca.recompute_shortest_paths();
+   // Resolve distances
+   ca.recompute_shortest_paths();
 
-	// Success
-   	return ca;
+    // Success
+   return ca;
 }
 
 void CA::show() {

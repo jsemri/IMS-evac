@@ -19,19 +19,19 @@ enum CellType {
 
 /** Cell structure. */
 struct Cell {
-	/** Cell type. */
-	CellType type;
-	/** Distance to upper border. */
-	int row;
-	/** Distance to left border. */
-	int col;
-	/** Distance (in hops) to nearest exit. */
-	unsigned exit_distance;
+    /** Cell type. */
+    CellType type;
+    /** Distance to upper border. */
+    int row;
+    /** Distance to left border. */
+    int col;
+    /** Distance (in hops) to nearest exit. */
+    unsigned exit_distance;
     // XXX maybe add more properties for other cell types
 
-	Cell() :
+    Cell() :
         type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
-	{}
+    {}
 };
 
 class CA {
@@ -41,23 +41,23 @@ public:
     CA(unsigned height, unsigned width);
     ~CA() = default;
 
-	///
+    ///
     bool evolve();
 
     ///
     void add_people(int people);
 
-	/**
-	 * Load model description from a bitmap.
-	 * @param filename name of input file
-	 * @return instance of CA class
-	 * @throw invalid_argument if failed to process input file
-	 * @note loaded model might be populated
-	 */
+    /**
+     * Load model description from a bitmap.
+     * @param filename name of input file
+     * @return instance of CA class
+     * @throw invalid_argument if failed to process input file
+     * @note loaded model might be populated
+     */
     static CA load(const std::string &filename);
 
     /// Store model description to "output.bmp".
-	void show();
+    void show();
 
     // Inline methods:
 
@@ -72,13 +72,13 @@ public:
         return cells[0].size();
     }
 
-	/// Retrieve a cell at a specified position
+    /// Retrieve a cell at a specified position
     inline Cell& cell(int row, int col) {
         return cells[row][col];
     }
 
 private:
-	/// Position in matrix.
+    /// Position in matrix.
     using CellPosition = std::pair<size_t, size_t>;
 
     /// 2D matrix of cells.
@@ -95,11 +95,11 @@ private:
 
 
 
-	/// Return Moore neighbourhood of empty cells at current position.
+    /// Return Moore neighbourhood of empty cells at current position.
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
 
-	/// Recompute exit distances.
-	void recompute_shortest_paths();
+    /// Recompute exit distances.
+    void recompute_shortest_paths();
 
     // Inline methods:
 
@@ -109,14 +109,14 @@ private:
                cells[row][col].type == Exit;
     };
 
-	/// returns true if cell coordinates are valid
-	inline bool cell_check(int row, int col) const {
-		return row >= 0 && row < height() && col >= 0 && col < width();
-	}
+    /// returns true if cell coordinates are valid
+    inline bool cell_check(int row, int col) const {
+        return row >= 0 && row < height() && col >= 0 && col < width();
+    }
 
     /// push an position(row,col) to the vector if cell at this position is
- 	/// empty
- 	inline void push_if_empty(
+     /// empty
+     inline void push_if_empty(
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
         if (cell_check(row, col) && is_empty(row, col)) {
@@ -136,9 +136,10 @@ private:
 
     /// Retrieve a cell at a specified position
     inline Cell& cell(CellPosition pos) {
-		return cell(pos.first, pos.second);
+        return cell(pos.first, pos.second);
     }
 };
+
 } // end of namespace
 
 #endif
