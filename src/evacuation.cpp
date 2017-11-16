@@ -8,6 +8,7 @@
 
 #include <climits>
 #include <queue>
+#include <list>
 
 #include "evacuation.h"
 #include "bitmap.h"
@@ -158,7 +159,9 @@ void CA::recompute_shortest_paths() {
         exit_states.pop();
 
         // Initialize distances
-        std::vector<std::vector<unsigned>> distances(height(), std::vector<unsigned>(width()));
+        std::vector<std::vector<unsigned>> distances(
+			height(), std::vector<unsigned>(width())
+		);
         for (int row = 0; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
                 distances[row][col] = UINT_MAX;
@@ -167,7 +170,9 @@ void CA::recompute_shortest_paths() {
         distances[is.first][is.second] = 0;
 
         // Vector of visited states
-        std::vector<std::vector<bool>> visited(height(), std::vector<bool>(width()));
+        std::vector<std::vector<bool>> visited(
+			height(), std::vector<bool>(width())
+		);
         for (int row = 0; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
                 visited[row][col] = false;
@@ -175,15 +180,29 @@ void CA::recompute_shortest_paths() {
         }
 
         // Queue of unprocessed successors
-        std::queue<CellPosition> unprocessed;
-        unprocessed.push(is);
+        std::vector<CellPosition> unprocessed;
+        unprocessed.push_back(is);
 
         // Compute distances
         while(!unprocessed.empty()) {
-            // Extract unprocessed
-            CellPosition current = unprocessed.front();
-            unprocessed.pop();
-            visited[current.first][current.second] = true;
+			// Find minimum
+			int min = 0;
+			CellPosition &cp_min = unprocessed[min];
+			for(int i = 1; i < unprocessed.size(); i++) {
+				CellPosition current = unprocessed[i];
+				if(
+					distances[current.first][current.second] < distances[cp_min.first][cp_min.second]
+				) {
+					min = i;
+					cp_min = unprocessed[min];
+				}
+			}
+			
+			// Extract minimum
+            CellPosition current = unprocessed[min];
+			unprocessed[min] = unprocessed.back();
+			unprocessed.pop_back();
+			visited[current.first][current.second] = true;
             int current_distance = distances[current.first][current.second];
 
             // Generate successors
@@ -196,7 +215,7 @@ void CA::recompute_shortest_paths() {
                     if(current_distance + 1 < distances[r][c]) {
                         distances[r][c] = current_distance + 1;
                     }
-                    unprocessed.push(successor);
+                    unprocessed.push_back(successor);
                 }
             }
         }

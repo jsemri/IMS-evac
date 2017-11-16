@@ -91,6 +91,7 @@ public:
       * @param filename name of output file
       */
     static void sample_3(int length, const std::string &filename);
+     static void sample_4(int length, const std::string &filename);
 };
 
 #endif

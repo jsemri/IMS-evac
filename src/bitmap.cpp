@@ -232,3 +232,29 @@ void Bitmap::sample_3(int length, const std::string &filename) {
     // Output
     image.save_image(filename);
 }
+
+void Bitmap::sample_4(int length, const std::string &filename) {
+    // Construct image
+    int width = length, height = length;
+    bitmap_image image(width, height);
+    image_drawer pen(image);
+
+    // White background
+    image.set_all_channels(255, 255, 255);
+
+    // Walls
+    pick(pen, Wall);
+    hline(pen, 0, 0, width-1);
+    hline(pen, height-1, 0, width-1);
+    vline(pen, 0, height-1, 0);
+    vline(pen, 0, height-1, width-1);
+
+    // Exit
+    pick(pen, Exit);
+    pixel(pen, width/2, 0);
+    pixel(pen, width/2-1, 0);
+    pixel(pen, width/2+1, 0);
+
+    // Output
+    image.save_image(filename);
+}
