@@ -188,16 +188,16 @@ void CA::recompute_shortest_paths() {
 
         // Compute distances
         while(!unprocessed.empty()) {
-			// Find minimum
+			// Find unprocessed state with minimum exit distance
 			int min = 0;
-			CellPosition &cp_min = unprocessed[min];
+			CellPosition *cp_min = &unprocessed[min];
 			for(int i = 1; i < unprocessed.size(); i++) {
-				CellPosition current = unprocessed[i];
+				CellPosition cp = unprocessed[i];
 				if(
-					distances[current.first][current.second] < distances[cp_min.first][cp_min.second]
+					distances[cp.first][cp.second] < distances[cp_min->first][cp_min->second]
 				) {
 					min = i;
-					cp_min = unprocessed[min];
+					cp_min = &unprocessed[min];
 				}
 			}
 
@@ -241,7 +241,7 @@ CA CA::load(const std::string &filename) {
 
     // Resolve distances
     ca.recompute_shortest_paths();
-
+    
     // Success
     return ca;
 }

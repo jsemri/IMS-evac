@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
     ca.add_people(people);
     // uncoment for displaying heat map
-//    Bitmap::display_distances(ca);
+    Bitmap::display_distances(ca);
     // uncoment this for opening image with xdg-open
 //    std::system("xdg-open output.bmp");
 
