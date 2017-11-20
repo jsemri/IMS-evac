@@ -18,8 +18,10 @@ enum CellType {
     Exit,
     Wall,
     Person,
+    Smoke,
     PersonAppearance,
-    Smoke
+    PersonAtExit,
+    SmokeWithPerson
 };
 
 /** Cell structure. */
@@ -39,28 +41,20 @@ struct Cell {
     {}
 };
 
-/// Structure which represents a human being.
-struct Persona {
-    /// Position in the matrix.
-    CellPosition pos;
-    /// Health points.
-    int hp;
-
-    Persona(CellPosition pos) : pos{pos}, hp{100} {};
-};
-
 class CA {
 public:
-    // XXX some additional parameters may be added later
-    // considered parameters: chaos
     CA(unsigned height, unsigned width);
     ~CA() = default;
 
-    ///
+    /// Apply transition function on CA states.
+    /// @return false if there are no people to evacuate, true otherwise
     bool evolve();
 
-    ///
+    /// Distribute people over the building.
     void add_people(int people);
+
+    /// Distribute smoke over the building.
+    void add_smoke(int smoke);
 
     /**
      * Load model description from a bitmap.
@@ -73,6 +67,8 @@ public:
 
     /// Store model description to "output.bmp".
     void show();
+
+    void print_statistics() const noexcept;
 
     // Inline methods:
 
@@ -96,14 +92,15 @@ private:
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
 
-    /// Positions of the people to evacuate.
-    std::list<Persona> people;
+    /// variables for computing some statistics
+    int casualities;
+    int time;
 
-    /// Positions of exits.
-    std::vector<CellPosition> exits;
+    // methods
 
     /// Return Moore neighbourhood of empty cells at current position.
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
+    std::vector<CellPosition> cell_neighbourhood(size_t row, size_t col) const;
 
     /// Recompute exit distances.
     void recompute_shortest_paths();
@@ -114,6 +111,7 @@ private:
     inline bool is_empty(size_t row, size_t col) const {
         return cells[row][col].type == Empty ||
                cells[row][col].type == PersonAppearance ||
+               cells[row][col].type == Smoke ||
                cells[row][col].type == Exit;
     };
 

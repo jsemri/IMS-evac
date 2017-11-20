@@ -7,7 +7,6 @@
 #include <cassert>
 
 #include <climits>
-#include <queue>
 #include <list>
 
 #include "evacuation.h"
@@ -26,10 +25,8 @@ CA::CA(unsigned y, unsigned x) :
 {}
 
 std::vector<CellPosition>
-CA::cell_neighbourhood(CellPosition position) const {
+CA::cell_neighbourhood(size_t row, size_t col) const {
     std::vector<CellPosition> neighbours;
-    size_t row = position.first;
-    size_t col = position.second;
 
     push_if_empty(neighbours, row - 1, col);
     push_if_empty(neighbours, row, col - 1);
@@ -43,17 +40,59 @@ CA::cell_neighbourhood(CellPosition position) const {
     return neighbours;
 }
 
-bool CA::evolve() {
+std::vector<CellPosition>
+CA::cell_neighbourhood(CellPosition position) const {
+    return cell_neighbourhood(position.first, position.second);
+}
 
-    bool res = !people.empty();
-    // remove people at exits
-    for (auto i : exits) {
-        cell(i).type = Exit;
+bool CA::evolve() {
+    bool res = false;
+
+    std::vector<CellPosition> people;
+    for (size_t row = 0; row < height(); row++) {
+        for (size_t col = 0; col < width(); col++) {
+            auto &current = cells[row][col];
+            switch (current.type) {
+                case PersonAppearance:
+                case Empty:
+                {
+                    // propagation of smoke
+                    auto neighbours =
+                        cell_neighbourhood(CellPosition(row, col));
+                    int smoke_prob = 0;
+                    for (auto i : neighbours) {
+                        smoke_prob +=
+                            cell(i).type == Smoke ||
+                            cell(i).type == SmokeWithPerson;
+                    }
+                    if (PROB(smoke_prob/8.0)) {
+                        current.type = Smoke;
+                    }
+                    break;
+                }
+                case PersonAtExit:
+                    // remove people at exits
+                    current.type = Exit;
+                    break;
+                case SmokeWithPerson:
+                    // with 0.1 probability person in smoke faints and dies
+                    if (PROB(0.1)) {
+                        current.type = Smoke;
+                        casualities++;
+                        break;
+                    }
+                case Person:
+                    // remeber person position
+                    people.push_back(CellPosition(row, col));
+                default:
+                    ;
+            }
+        }
     }
 
-    for (auto person = people.begin(); person != people.end(); person++) {
-        auto &person_pos = person->pos;
-        auto neighbours = cell_neighbourhood(person_pos);
+    res = !people.empty();
+    for (auto person : people) {
+        auto neighbours = cell_neighbourhood(person);
         if (!neighbours.empty()) {
             // find min value
             CellPosition next_cell = neighbours[0];
@@ -63,10 +102,13 @@ bool CA::evolve() {
                 }
             }
 
-            // non-deterministic choice of the maximum
+            // non-deterministic choice of the minimum
             for (size_t j = 0; j < neighbours.size(); j++) {
                 if (distance(next_cell) == distance(neighbours[j])) {
                     next_cell = neighbours[j];
+                    if (cell(next_cell).type == Smoke) {
+                        continue;
+                    }
                     if (PROB(0.95)) {
                         break;
                     }
@@ -74,30 +116,38 @@ bool CA::evolve() {
             }
 
             // distance to the next cell
-            int diff = distance(person_pos) - distance(next_cell);
+            int person_distance = distance(person);
+            int next_distance = distance(next_cell);
+            int diff = person_distance - next_distance;
             assert (diff == 0 || diff == -1 || diff == 1);
             // move to the cell with lesser exit distance or same distance
             // with some probability
             if (diff == 1 ||
-                (diff == 0 && PROB(1 * distance(person_pos) / 10.0)))
+                (diff == 0 && PROB(1 * person_distance / 10.0)))
             {
-                // move the person
-                if (cell(next_cell).type == Smoke) {
-                    // TODO decrease person's HP
+                // move from empty or smoke cell
+                cell(person).type =
+                    cell(person).type == Person ? Empty : Smoke;
+                auto &next_type = cell(next_cell).type;
+                if (next_type == Smoke) {
+                    next_type = SmokeWithPerson;
                 }
-                cell(person_pos).type = Empty;
-                person_pos = next_cell;
-                cell(person_pos).type = Person;
-            }
-
-            if (distance(person_pos) == 0) {
-                // remove evacuated person
-                person = people.erase(person)--;
+                else if (next_type == Exit) {
+                    next_type = PersonAtExit;
+                }
+                else {
+                    next_type = Person;
+                }
             }
         }
     }
 
     return res;
+}
+
+void CA::add_smoke(int smoke) {
+    // TODO
+    (void)smoke;
 }
 
 // somehow distribute people over empty cells
@@ -114,9 +164,6 @@ void CA::add_people(int people_count) {
             else if (cells[i][j].type == PersonAppearance) {
                 empty_priority_cells.push_back(CellPosition(i,j));
             }
-            else if (cells[i][j].type == Exit) {
-                exits.push_back(CellPosition(i,j));
-            }
         }
     }
 
@@ -129,18 +176,14 @@ void CA::add_people(int people_count) {
 
     // placing people according to priority
     while (!empty_priority_cells.empty() && people_count-- > 0) {
-        people.push_back(Persona(empty_priority_cells.back()));
+        cell(empty_priority_cells.back()).type = Person;
         empty_priority_cells.pop_back();
     }
 
     while (people_count-- > 0) {
         assert(!empty_cells.empty());
-        people.push_back(Persona(empty_cells.back()));
+        cell(empty_cells.back()).type = Person;
         empty_cells.pop_back();
-    }
-
-    for (auto i : people) {
-        cell(i.pos).type = Person;
     }
 }
 
@@ -198,7 +241,8 @@ void CA::recompute_shortest_paths() {
 			for(int i = 1; i < unprocessed.size(); i++) {
 				CellPosition cp = unprocessed[i];
 				if(
-					distances[cp.first][cp.second] < distances[cp_min->first][cp_min->second]
+					distances[cp.first][cp.second] <
+					distances[cp_min->first][cp_min->second]
 				) {
 					min = i;
 					cp_min = &unprocessed[min];
@@ -252,4 +296,8 @@ CA CA::load(const std::string &filename) {
 
 void CA::show() {
     Bitmap::store(*this, "output.bmp");
+}
+
+void CA::print_statistics() const noexcept {
+    // TODO
 }

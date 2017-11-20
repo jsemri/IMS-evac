@@ -21,17 +21,25 @@ constexpr rgb_t green = {0, 255, 0};
 constexpr rgb_t blue = {0, 0, 255};
 
 constexpr rgb_t yellow = {255, 255, 0};
+constexpr rgb_t lightred = {255, 102, 102};
+constexpr rgb_t brown = {51, 25, 0};
 
 rgb_t Bitmap::translate(CellType type) {
     switch(type) {
         case Empty:
+        case PersonAppearance:
             return white;
         case Wall:
-            return grey;
+            return brown;
         case Person:
+        case PersonAtExit:
             return red;
         case Exit:
             return green;
+        case Smoke:
+            return grey;
+        case SmokeWithPerson:
+            return lightred;
         default:
             return black;
     }

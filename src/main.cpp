@@ -3,6 +3,8 @@
 
 #include <unistd.h>
 #include <getopt.h>
+#include <sys/types.h>
+#include <signal.h>
 
 #include "evacuation.h"
 #include "bitmap.h"    // remove after debug
