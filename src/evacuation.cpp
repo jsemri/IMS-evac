@@ -7,7 +7,7 @@
 #include <cassert>
 
 #include <climits>
-#include <list>
+#include <queue>
 
 #include "evacuation.h"
 #include "bitmap.h"
@@ -18,10 +18,15 @@
 #define RAND (((double) rand()) / (RAND_MAX))
 #define PROB(val) val > RAND
 
+#define SMOKE_SPREADING_RATE 0.2
+#define FAINT_DEATH_RATE 0.1
+#define DIRECTION_CHANGE_RATE 0.95
+
 using namespace Evacuation;
 
 CA::CA(unsigned y, unsigned x) :
-    cells(y, std::vector<Cell>(x))
+    cells(y, std::vector<Cell>(x)), pedestrians{0}, time{0}, casualties{0},
+    moves{0}
 {}
 
 std::vector<CellPosition>
@@ -47,6 +52,7 @@ CA::cell_neighbourhood(CellPosition position) const {
 
 bool CA::evolve() {
     bool res = false;
+    time++;
 
     std::vector<CellPosition> people;
     for (size_t row = 0; row < height(); row++) {
@@ -65,7 +71,7 @@ bool CA::evolve() {
                             cell(i).type == Smoke ||
                             cell(i).type == SmokeWithPerson;
                     }
-                    if (PROB(smoke_prob/8.0)) {
+                    if (PROB(smoke_prob / 8.0 * SMOKE_SPREADING_RATE)) {
                         current.type = Smoke;
                     }
                     break;
@@ -78,11 +84,11 @@ bool CA::evolve() {
                     // with 0.1 probability person in smoke faints and dies
                     if (PROB(0.1)) {
                         current.type = Smoke;
-                        casualities++;
+                        casualties++;
                         break;
                     }
                 case Person:
-                    // remeber person position
+                    // remember person position
                     people.push_back(CellPosition(row, col));
                 default:
                     ;
@@ -109,7 +115,7 @@ bool CA::evolve() {
                     if (cell(next_cell).type == Smoke) {
                         continue;
                     }
-                    if (PROB(0.95)) {
+                    if (PROB(DIRECTION_CHANGE_RATE)) {
                         break;
                     }
                 }
@@ -126,6 +132,7 @@ bool CA::evolve() {
                 (diff == 0 && PROB(1 * person_distance / 10.0)))
             {
                 // move from empty or smoke cell
+                moves++;
                 cell(person).type =
                     cell(person).type == Person ? Empty : Smoke;
                 auto &next_type = cell(next_cell).type;
@@ -146,13 +153,21 @@ bool CA::evolve() {
 }
 
 void CA::add_smoke(int smoke) {
-    // TODO
-    (void)smoke;
+    while (smoke > 0) {
+        size_t row = std::rand() % height();
+        size_t col = std::rand() % width();
+        if (cells[row][col].type == Empty ||
+            cells[row][col].type == PersonAppearance)
+        {
+            cells[row][col].type = Smoke;
+            smoke--;
+        }
+    }
 }
 
 // somehow distribute people over empty cells
 void CA::add_people(int people_count) {
-
+    pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
     // mark all cells with possible person appearance
@@ -174,16 +189,12 @@ void CA::add_people(int people_count) {
     shuffle(empty_priority_cells);
     shuffle(empty_cells);
 
-    // placing people according to priority
+    empty_priority_cells.insert(
+        empty_priority_cells.end(), empty_cells.begin(), empty_cells.end());
+    // placing people according to the priority
     while (!empty_priority_cells.empty() && people_count-- > 0) {
         cell(empty_priority_cells.back()).type = Person;
         empty_priority_cells.pop_back();
-    }
-
-    while (people_count-- > 0) {
-        assert(!empty_cells.empty());
-        cell(empty_cells.back()).type = Person;
-        empty_cells.pop_back();
     }
 }
 
@@ -299,5 +310,27 @@ void CA::show() {
 }
 
 void CA::print_statistics() const noexcept {
-    // TODO
+    // TODO exits - number, size, loading
+    std::cout << "*********************************************************\n";
+    float traveled = 0.4 * moves;
+    float realtime = time * 0.3;
+    int evacuated = pedestrians - casualties;
+    std::cout << "Total pedestrians                 : " << pedestrians
+        << std::endl;
+    std::cout << "People evacuated                  : " << evacuated
+        << std::endl;
+    std::cout << "Casualties                        : " << casualties
+        << std::endl;
+    std::cout << "Casualties %                      : "
+        << casualties * 1.0 / pedestrians  << std::endl;
+//    std::cout << "Exit total size                   : " << std::endl;
+    std::cout << "Total evacuation time             : " << realtime << " s"
+        << std::endl;
+    std::cout << "Mean evacuation time per person   : "
+        << realtime / evacuated << " s" << std::endl;
+    std::cout << "Total distance traveled           : " << traveled << " m"
+        << std::endl;
+    std::cout << "Mean distance traveled per person : "
+        << traveled / pedestrians << " m" << std::endl;
+    std::cout << "*********************************************************\n";
 }

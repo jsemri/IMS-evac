@@ -93,8 +93,10 @@ private:
     std::vector<std::vector<Cell>> cells;
 
     /// variables for computing some statistics
-    int casualities;
+    int pedestrians;
     int time;
+    int casualties;
+    int moves;
 
     // methods
 

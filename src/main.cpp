@@ -14,28 +14,30 @@ const char *helpstr =
 "Usage: evac INPUT [OPTIONS] ...\n"
 "  -h            : show this help and exit\n"
 "  -t <DELAY>    : set delay of next step of evolution in ms, default 400\n"
-"  -p <N>        : number of people to evacuate, default 100\n";
+"  -p <N>        : number of people to evacuate, default 100\n"
+"  -s <N>        : number of cells with smoke\n";
 
 int main(int argc, char **argv) {
-	long delay = 2*8000;   // simulation time
+    long delay = 1000 * 400;   // simulation time
     int people = 100;   // persons to evacuate
     int opt_cnt = 1;    // used for locating positional argument
+    int smoke = -1;     // cells with smoke
     int c;              // reading the options
 
-    while ((c = getopt(argc, argv, "ht:p:")) != -1) {
-        opt_cnt++;
+    while ((c = getopt(argc, argv, "ht:p:s:")) != -1) {
+        opt_cnt += 2;
         switch (c) {
-            // TODO add more options later
             case 'h':
                 fprintf(stderr, "%s", helpstr);
                 return 0;
             case 't':
-                opt_cnt++;
                 delay = 1000 * std::stoi(optarg); // in milliseconds
                 break;
             case 'p':
-                opt_cnt++;
                 people = std::stoi(optarg);
+                break;
+            case 's':
+                smoke = std::stoi(optarg);
                 break;
             default:
                 return 1;
@@ -50,6 +52,7 @@ int main(int argc, char **argv) {
     // reading a pix
     Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
     ca.add_people(people);
+    ca.add_smoke(smoke);
     // uncoment for displaying heat map
     Bitmap::display_distances(ca);
     // uncoment this for opening image with xdg-open
@@ -63,8 +66,7 @@ int main(int argc, char **argv) {
         usleep(delay);
     }
     ca.show();
-
-    // TODO some statistics, plots, etc.
+    ca.print_statistics();
 
     return 0;
 }
