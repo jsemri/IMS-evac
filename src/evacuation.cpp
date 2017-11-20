@@ -25,19 +25,19 @@ CA::CA(unsigned y, unsigned x) :
     cells(y, std::vector<Cell>(x))
 {}
 
-std::vector<CA::CellPosition>
+std::vector<CellPosition>
 CA::cell_neighbourhood(CellPosition position) const {
     std::vector<CellPosition> neighbours;
     size_t row = position.first;
     size_t col = position.second;
 
-    push_if_empty(neighbours, row - 1, col - 1);
     push_if_empty(neighbours, row - 1, col);
-    push_if_empty(neighbours, row - 1, col + 1);
     push_if_empty(neighbours, row, col - 1);
     push_if_empty(neighbours, row, col + 1);
-    push_if_empty(neighbours, row + 1, col - 1);
     push_if_empty(neighbours, row + 1, col);
+    push_if_empty(neighbours, row - 1, col - 1);
+    push_if_empty(neighbours, row - 1, col + 1);
+    push_if_empty(neighbours, row + 1, col - 1);
     push_if_empty(neighbours, row + 1, col + 1);
 
     return neighbours;
@@ -51,13 +51,9 @@ bool CA::evolve() {
         cell(i).type = Exit;
     }
 
-    std::vector<size_t> to_erase;
-    shuffle(people);
-
-    for (size_t i = 0; i < people.size(); i++) {
-        auto &person = people[i];
-        auto neighbours = cell_neighbourhood(person);
-        shuffle(neighbours);
+    for (auto person = people.begin(); person != people.end(); person++) {
+        auto &person_pos = person->pos;
+        auto neighbours = cell_neighbourhood(person_pos);
         if (!neighbours.empty()) {
             // find min value
             CellPosition next_cell = neighbours[0];
@@ -67,30 +63,38 @@ bool CA::evolve() {
                 }
             }
 
+            // non-deterministic choice of the maximum
+            for (size_t j = 0; j < neighbours.size(); j++) {
+                if (distance(next_cell) == distance(neighbours[j])) {
+                    next_cell = neighbours[j];
+                    if (PROB(0.95)) {
+                        break;
+                    }
+                }
+            }
+
             // distance to the next cell
-            int diff = distance(person) - distance(next_cell);
-            // XXX this must hold
+            int diff = distance(person_pos) - distance(next_cell);
             assert (diff == 0 || diff == -1 || diff == 1);
             // move to the cell with lesser exit distance or same distance
             // with some probability
-            if (diff == 1 || (diff == 0 && PROB(0.02))) {
+            if (diff == 1 ||
+                (diff == 0 && PROB(1 * distance(person_pos) / 10.0)))
+            {
                 // move the person
-                cell(person).type = Empty;
-                person = next_cell;
-                cell(person).type = Person;
+                if (cell(next_cell).type == Smoke) {
+                    // TODO decrease person's HP
+                }
+                cell(person_pos).type = Empty;
+                person_pos = next_cell;
+                cell(person_pos).type = Person;
             }
 
-            if (distance(person) == 0) {
-                to_erase.push_back(i);
+            if (distance(person_pos) == 0) {
+                // remove evacuated person
+                person = people.erase(person)--;
             }
         }
-    }
-
-    // remove evacuated people
-    int idx = 0;
-    for (auto i : to_erase) {
-        people.erase(people.begin()+i-idx);
-        idx++;
     }
 
     return res;
@@ -125,18 +129,18 @@ void CA::add_people(int people_count) {
 
     // placing people according to priority
     while (!empty_priority_cells.empty() && people_count-- > 0) {
-        people.push_back(empty_priority_cells.back());
+        people.push_back(Persona(empty_priority_cells.back()));
         empty_priority_cells.pop_back();
     }
 
     while (people_count-- > 0) {
         assert(!empty_cells.empty());
-        people.push_back(empty_cells.back());
+        people.push_back(Persona(empty_cells.back()));
         empty_cells.pop_back();
     }
 
     for (auto i : people) {
-        cell(i).type = Person;
+        cell(i.pos).type = Person;
     }
 }
 
@@ -241,7 +245,7 @@ CA CA::load(const std::string &filename) {
 
     // Resolve distances
     ca.recompute_shortest_paths();
-    
+
     // Success
     return ca;
 }
