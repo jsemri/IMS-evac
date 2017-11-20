@@ -11,13 +11,11 @@ const char *helpstr =
 "Program for simulating evacuation of building.\n"
 "Usage: evac INPUT [OPTIONS] ...\n"
 "  -h            : show this help and exit\n"
-"  -t <DELAY>    : set delay of next step of evolution in ms, if not \n"
-"                  specified the steps of the evolution are managed bye \n"
-"                  hitting the Enter key\n"
+"  -t <DELAY>    : set delay of next step of evolution in ms, default 400\n"
 "  -p <N>        : number of people to evacuate, default 100\n";
 
 int main(int argc, char **argv) {
-	long delay =  -1;   // simulation time
+	long delay = 2*8000;   // simulation time
     int people = 100;   // persons to evacuate
     int opt_cnt = 1;    // used for locating positional argument
     int c;              // reading the options
@@ -53,19 +51,14 @@ int main(int argc, char **argv) {
     // uncoment for displaying heat map
     Bitmap::display_distances(ca);
     // uncoment this for opening image with xdg-open
-//    std::system("xdg-open output.bmp");
+    std::system("xdg-open output.bmp");
 
     std::srand(std::time(0));
     // evolve CA in loop until CA can't change its states
     while (ca.evolve()) {
         // showing the current state of CA
         ca.show();
-        if (delay != -1) {
-            usleep(delay);
-        }
-        else {
-            while(std::getchar() != '\n');
-        }
+        usleep(delay);
     }
     ca.show();
 
