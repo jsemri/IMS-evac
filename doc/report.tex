@@ -1,0 +1,109 @@
+\documentclass[english]{report}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{cmap}
+\usepackage{url}
+\usepackage{ragged2e}
+\usepackage{color}
+\usepackage{etoolbox}
+
+\ifx\pdfoutput\undefined
+    \usepackage{graphics}
+    \usepackage{epsfig}
+\else
+    \usepackage{pdfpages}
+\fi
+\usepackage[a4paper]{geometry}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{picture}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{textcomp}
+\usepackage{pdflscape}
+
+\lstset{
+    backgroundcolor=\color{white},
+    tabsize=4,
+    rulecolor=,
+    upquote=true,
+    columns=flexible,
+    extendedchars=true,
+    breaklines=true,
+    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=shadowbox,
+    showtabs=false,
+    showspaces=false,
+    showstringspaces=false,
+    identifierstyle=\ttfamily,
+    captionpos=b,
+    basicstyle=\scriptsize\ttfamily,
+    keywordstyle=\ttfamily\bfseries\color{OliveGreen},
+    commentstyle=\color{Blue},
+    stringstyle=\color{Red},
+    numberstyle=\tiny\color{gray},
+    breakatwhitespace=false,
+    mathescape=false,
+    escapechar=ř,
+}
+
+\lstdefinestyle{myBash}{
+    language=bash,
+}
+
+\ifx\pdfoutput\undefined
+\else
+  \usepackage{color}
+  \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex]{hyperref}
+  \definecolor{links}{rgb}{0.4,0.5,0}
+  \definecolor{anchors}{rgb}{1,0,0}
+  \def\AnchorColor{anchors}
+  \def\LinkColor{links}
+  \def\pdfBorderAttrs{/Border [0 0 0] }
+  \pdfcompresslevel=9
+\fi
+
+\usepackage[all]{hypcap}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\includegraphics[width=0.5\textwidth]{figures/fitlogo.eps}\par\vspace{1cm}
+{\scshape\LARGE Brno University of Technology\par}
+\vspace{0.25cm}
+{\scshape\LARGE Faculty of Information Technology\par}
+\vspace{1cm}
+{\scshape\Large IMS project\par}
+\vspace{1.5cm}
+{\Huge\bfseries Evacuation Simulation\par}
+\vspace{2cm}
+{\Large Jakub Semrič\par}
+{\Large Roman Andriushchenko\par}
+\vfill
+{\large\today\par}
+\end{titlepage}
+
+\tableofcontents
+
+\input{content}
+\bibliographystyle{englishiso}
+\makeatletter
+\def\@openbib@code{\addcontentsline{toc}{chapter}{Bibliography}}
+\makeatother
+\bibliography{citations}
+
+
+%\appendix
+%\appendixpage
+
+%\startcontents[chapters]
+
+%\input{appendices} % viz. prilohy.tex / see prilohy.tex
+
+\end{document}

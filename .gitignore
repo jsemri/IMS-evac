@@ -1,4 +1,12 @@
 *.o
 *.d
 *.swp
+*.pdf
+*.toc
+*.dvi
+*.out
+*.aux
+*.bbl
+*.log
+*.blg
 evac
