@@ -1,4 +1,5 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
 
 #include <iostream>
 #include <algorithm>
@@ -82,7 +83,7 @@ bool CA::evolve() {
                     break;
                 case SmokeWithPerson:
                     // with 0.1 probability person in smoke faints and dies
-                    if (PROB(0.1)) {
+                    if (PROB(FAINT_DEATH_RATE)) {
                         current.type = Smoke;
                         casualties++;
                         break;
@@ -97,6 +98,7 @@ bool CA::evolve() {
     }
 
     res = !people.empty();
+    shuffle(people);
     for (auto person : people) {
         auto neighbours = cell_neighbourhood(person);
         if (!neighbours.empty()) {
