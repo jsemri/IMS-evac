@@ -17,11 +17,13 @@ enum CellType {
     Empty = 0,
     Exit,
     Wall,
+    Obstacle,
     Person,
     Smoke,
     PersonAppearance,
     PersonAtExit,
-    SmokeWithPerson
+    SmokeWithPerson,
+    SmokeWithObstacle
 };
 
 /** Cell structure. */
@@ -97,15 +99,20 @@ private:
     int time;
     int casualties;
     int moves;
+    int max_distance;
 
     // methods
 
     /// Return Moore neighbourhood of empty cells at current position.
     std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
     std::vector<CellPosition> cell_neighbourhood(size_t row, size_t col) const;
+    std::vector<CellPosition> cell_neighbourhood2(size_t row, size_t col) const;
 
     /// Recompute exit distances.
     void recompute_shortest_paths();
+
+    /// Compute max distance.
+    void compute_max_distance();
 
     // Inline methods:
 
@@ -114,6 +121,15 @@ private:
         return cells[row][col].type == Empty ||
                cells[row][col].type == PersonAppearance ||
                cells[row][col].type == Smoke ||
+               cells[row][col].type == Exit;
+    };
+
+    /// returns true if cell at specified position is empty or it is an exit
+    inline bool is_empty2(size_t row, size_t col) const {
+        return cells[row][col].type == Empty ||
+               cells[row][col].type == PersonAppearance ||
+               cells[row][col].type == Smoke ||
+               cells[row][col].type == SmokeWithObstacle ||
                cells[row][col].type == Exit;
     };
 
@@ -128,6 +144,14 @@ private:
         std::vector<CellPosition> &vec, size_t row, size_t col) const
     {
         if (cell_check(row, col) && is_empty(row, col)) {
+            vec.push_back(CellPosition(row, col));
+        }
+    }
+
+    inline void push_if_empty2(
+        std::vector<CellPosition> &vec, size_t row, size_t col) const
+    {
+        if (cell_check(row, col) && is_empty2(row, col)) {
             vec.push_back(CellPosition(row, col));
         }
     }

@@ -24,6 +24,10 @@ constexpr rgb_t yellow = {255, 255, 0};
 constexpr rgb_t lightred = {255, 102, 102};
 constexpr rgb_t brown = {51, 25, 0};
 
+constexpr rgb_t lightpink = {255, 204, 204};
+constexpr rgb_t lightgrey = {160, 160, 160};
+constexpr rgb_t orange = {255, 128, 0};
+
 rgb_t Bitmap::translate(CellType type) {
     switch(type) {
         case Empty:
@@ -40,6 +44,10 @@ rgb_t Bitmap::translate(CellType type) {
             return grey;
         case SmokeWithPerson:
             return lightred;
+        case SmokeWithObstacle:
+            return lightgrey;
+        case Obstacle:
+            return orange;
         default:
             return black;
     }
@@ -54,7 +62,14 @@ CellType Bitmap::translate(rgb_t rgb) {
         return Person;
     } else if(rgb == green) {
         return Exit;
-    } else {
+    } else if (rgb == lightpink) {
+        return PersonAppearance;
+    } else if (rgb == orange) {
+        return Obstacle;
+    } else if (rgb == lightgrey) {
+        return SmokeWithObstacle;
+    }
+    else {
         return Wall;
     }
 }
