@@ -9,22 +9,43 @@
 
 namespace Evacuation {
 
+/// Simulation constant parameters
+
+/// real seconds per simulation step
+const float time_step = 0.3;
+/// width of a cell in meters
+const float cell_width = 0.4;
+/// Probability that person moves to cell with same exit distance
+const float chaos_rate = 0.25;
+/// Probability that person in smoke cells faints and suddenly dies.
+const float faint_death_rate = 0.04;
+/// Coefficient of smoke spreading.
+const float smoke_spreading_rate = 0.2;
+
+
 /// Position in matrix.
 using CellPosition = std::pair<size_t, size_t>;
 
 /** Type of a cell. */
 enum CellType {
-    Empty =            0b0000000001,
-    Exit =             0b0000000010,
-    Wall =             0b0000000100,
-    Obstacle =         0b0000001000,
-    Person =           0b0000010000,
-    Smoke =            0b0000100000,
-    PersonAppearance = 0b0001000000,
-    PersonAtExit =     0b0010000000,
-    PersonWithSmoke =  0b0100000000,
-    ObstacleWithSmoke =0b1000000000
+    Empty =             0b0000000001,
+    Exit =              0b0000000010,
+    Wall =              0b0000000100,
+    Obstacle =          0b0000001000,
+    Person =            0b0000010000,
+    Smoke =             0b0000100000,
+    PersonAppearance =  0b0001000000,
+    PersonAtExit =      0b0010000000,
+    PersonWithSmoke =   0b0100000000,
+    ObstacleWithSmoke = 0b1000000000
 };
+
+/// Groups of cell types used for cell filtering
+
+/// Cells where person can move into.
+constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
+/// Cells which have an impact of smoke propagation.
+constexpr int SmokeCells = Smoke | ObstacleWithSmoke | PersonWithSmoke;
 
 /** Cell structure. */
 struct Cell {
@@ -90,17 +111,16 @@ public:
     }
 
 private:
-    static constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
-    static constexpr int SmokeCells = Smoke | ObstacleWithSmoke
-                                            | PersonWithSmoke;
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
 
     /// variables for computing some statistics
     int pedestrians;
+    int evacuated;
     int time;
     int casualties;
     int moves;
+    int total_time;
 
     // methods
 

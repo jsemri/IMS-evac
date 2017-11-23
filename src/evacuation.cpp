@@ -19,19 +19,16 @@
 #define RAND (((double) rand()) / (RAND_MAX))
 #define PROB(val) val > RAND
 
-#define SMOKE_SPREADING_RATE 0.2
-#define FAINT_DEATH_RATE 0.04
-#define MOVE_NOT_CLOSER_COEF 0.25
-
 using namespace Evacuation;
 
 CA::CA(unsigned y, unsigned x) :
-    cells(y, std::vector<Cell>(x)), pedestrians{0}, time{0}, casualties{0},
-    moves{0}
+    cells(y, std::vector<Cell>(x)), pedestrians{0}, evacuated{0},
+    time{0}, casualties{0}, moves{0}, total_time{0}
 {}
 
 std::vector<CellPosition>
-CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const {
+CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const
+{{{
     std::vector<CellPosition> neighbours;
 
     push_if(neighbours, row - 1, col, cell_types);
@@ -44,14 +41,16 @@ CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const {
     push_if(neighbours, row + 1, col + 1, cell_types);
 
     return neighbours;
-}
+}}}
 
 std::vector<CellPosition>
-CA::cell_neighbourhood(CellPosition position, int cell_types) const {
+CA::cell_neighbourhood(CellPosition position, int cell_types) const
+{{{
     return cell_neighbourhood(position.first, position.second, cell_types);
-}
+}}}
 
-bool CA::evolve() {
+bool CA::evolve()
+{{{
     bool res = false;
     time++;
 
@@ -74,7 +73,7 @@ bool CA::evolve() {
                             cell(i).type == PersonWithSmoke ||
                             cell(i).type == ObstacleWithSmoke;
                     }
-                    if (PROB(smoke_prob / 8.0 * SMOKE_SPREADING_RATE)) {
+                    if (PROB(smoke_prob / 8.0 * smoke_spreading_rate)) {
                         if (current.type == Obstacle)
                             current.type = ObstacleWithSmoke;
                         else
@@ -84,11 +83,13 @@ bool CA::evolve() {
                 }
                 case PersonAtExit:
                     // remove people at exits
+                    evacuated++;
+                    total_time += time;
                     current.type = Exit;
                     break;
                 case PersonWithSmoke:
                     // with 0.1 probability person in smoke faints and dies
-                    if (PROB(FAINT_DEATH_RATE)) {
+                    if (PROB(faint_death_rate)) {
                         current.type = Smoke;
                         casualties++;
                         break;
@@ -125,7 +126,7 @@ bool CA::evolve() {
             // move to the cell with lesser exit distance or same distance
             // with some probability
             if (diff == 1 ||
-                (diff == 0 && PROB(MOVE_NOT_CLOSER_COEF)))
+                (diff == 0 && PROB(chaos_rate)))
             {
                 // move from empty or smoke cell
                 moves++;
@@ -146,9 +147,10 @@ bool CA::evolve() {
     }
 
     return res;
-}
+}}}
 
-void CA::add_smoke(int smoke) {
+void CA::add_smoke(int smoke)
+{{{
     std::vector<CellPosition> empty_cells;
     for (size_t i = 0; i < height(); i++) {
         for (size_t j = 0; j < width(); j++) {
@@ -169,10 +171,11 @@ void CA::add_smoke(int smoke) {
         empty_cells.pop_back();
     }
 
-}
+}}}
 
 // somehow distribute people over empty cells
-void CA::add_people(int people_count) {
+void CA::add_people(int people_count)
+{{{
     pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
@@ -205,9 +208,10 @@ void CA::add_people(int people_count) {
         cell(empty_cells.back()).type = Person;
         empty_cells.pop_back();
     }
-}
+}}}
 
-void CA::recompute_shortest_paths() {
+void CA::recompute_shortest_paths()
+{{{
     // Identify exit states
     std::queue<CellPosition> exit_states;
     for (int row = 0; row < height(); row++) {
@@ -301,9 +305,10 @@ void CA::recompute_shortest_paths() {
             }
         }
     }
-}
+}}}
 
-CA CA::load(const std::string &filename) {
+CA CA::load(const std::string &filename)
+{{{
     // Load from image
     CA ca = Bitmap::load(filename);
 
@@ -312,18 +317,20 @@ CA CA::load(const std::string &filename) {
 
     // Success
     return ca;
-}
+}}}
 
-void CA::show() {
+void CA::show()
+{{{
     Bitmap::store(*this, "output.bmp");
-}
+}}}
 
-void CA::print_statistics() const noexcept {
+void CA::print_statistics() const noexcept
+{{{
     // TODO exits - number, size, loading
     std::cout << "*********************************************************\n";
-    float traveled = 0.4 * moves;
-    float realtime = time * 0.4;
-    int evacuated = pedestrians - casualties;
+    float traveled = moves * cell_width;
+    float realtime = time * time_step;
+    assert (evacuated == pedestrians - casualties);
     std::cout << "Total pedestrians                 : " << pedestrians
         << std::endl;
     std::cout << "People evacuated                  : " << evacuated
@@ -336,10 +343,10 @@ void CA::print_statistics() const noexcept {
     std::cout << "Total evacuation time             : " << realtime << " s"
         << std::endl;
     std::cout << "Mean evacuation time per person   : "
-        << realtime / evacuated << " s" << std::endl;
+        << total_time * 0.3 / evacuated << " s" << std::endl;
     std::cout << "Total distance traveled           : " << traveled << " m"
         << std::endl;
     std::cout << "Mean distance traveled per person : "
         << traveled / pedestrians << " m" << std::endl;
     std::cout << "*********************************************************\n";
-}
+}}}

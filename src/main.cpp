@@ -49,28 +49,34 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // reading a pix
-    Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
-    ca.add_people(people);
-    ca.add_smoke(smoke);
-    // uncoment for displaying heat map
-    Bitmap::display_distances(ca);
-    // uncoment this for opening image with xdg-open
-    if (delay > 0) {
-        std::system("xdg-open output.bmp");
-    }
-
-    std::srand(std::time(0));
-    // evolve CA in loop until CA can't change its states
-    while (ca.evolve()) {
-        // showing the current state of CA
+    try {
+        // reading a pix
+        Evacuation::CA ca = Evacuation::CA::load(argv[opt_cnt]);
+        ca.add_people(people);
+        ca.add_smoke(smoke);
+        // uncoment for displaying heat map
+        Bitmap::display_distances(ca);
+        // uncoment this for opening image with xdg-open
         if (delay > 0) {
-            ca.show();
+            std::system("xdg-open output.bmp");
         }
-        usleep(delay);
+
+        std::srand(std::time(0));
+        // evolve CA in loop until CA can't change its states
+        while (ca.evolve()) {
+            // showing the current state of CA
+            if (delay > 0) {
+                ca.show();
+            }
+            usleep(delay);
+        }
+        ca.show();
+        ca.print_statistics();
     }
-    ca.show();
-    ca.print_statistics();
+    catch (std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }
