@@ -23,7 +23,7 @@ using namespace Evacuation;
 
 CA::CA(unsigned y, unsigned x) :
     cells(y, std::vector<Cell>(x)), pedestrians{0}, evacuated{0},
-    time{0}, casualties{0}, moves{0}, total_time{0}
+    time{0}, smoke_exposed{0}, moves{0}, total_time{0}
 {}
 
 std::vector<CellPosition>
@@ -64,20 +64,15 @@ bool CA::evolve()
                 case Empty:
                 {
                     // propagation of smoke
-                    auto neighbours =
-                        cell_neighbourhood(row, col, SmokeCells);
-                    int smoke_prob = 0;
-                    for (auto i : neighbours) {
-                        smoke_prob +=
-                            cell(i).type == Smoke ||
-                            cell(i).type == PersonWithSmoke ||
-                            cell(i).type == ObstacleWithSmoke;
-                    }
-                    if (PROB(smoke_prob / 8.0 * smoke_spreading_rate)) {
-                        if (current.type == Obstacle)
+                    int smoke_neigh =
+                        cell_neighbourhood(row, col, SmokeCells).size();
+                    if (PROB( smoke_neigh/ 8.0 * smoke_spreading_rate)) {
+                        if (current.type == Obstacle) {
                             current.type = ObstacleWithSmoke;
-                        else
+                        }
+                        else {
                             current.type = Smoke;
+                        }
                     }
                     break;
                 }
@@ -88,12 +83,7 @@ bool CA::evolve()
                     current.type = Exit;
                     break;
                 case PersonWithSmoke:
-                    // with 0.1 probability person in smoke faints and dies
-                    if (PROB(faint_death_rate)) {
-                        current.type = Smoke;
-                        casualties++;
-                        break;
-                    }
+                    smoke_exposed++;
                 case Person:
                     // remember person position
                     people.push_back(CellPosition(row, col));
@@ -105,7 +95,7 @@ bool CA::evolve()
 
     // Recompute exit distances
     recompute_shortest_paths();
-    
+
     // Propagate people
     res = !people.empty();
     shuffle(people);
@@ -235,7 +225,7 @@ void CA::recompute_shortest_paths()
         // Extract initial state
         CellPosition is = exit_states.front();
         exit_states.pop();
-        
+
         // Initialize distances
         std::vector<std::vector<double>> distances(
 			height(), std::vector<double>(width())
@@ -283,20 +273,20 @@ void CA::recompute_shortest_paths()
             int current_distance = distances[current.first][current.second];
 
             // Cell types that can be considered adjacent
-            constexpr int succTypes =  Empty | Exit | Person | Smoke 
+            constexpr int succTypes =  Empty | Exit | Person | Smoke
                 | PersonAppearance | PersonAtExit | PersonWithSmoke;
-                
+
             // Generate successors
             std::vector<CellPosition> successors;
             successors = cell_neighbourhood(current, succTypes);
-            
+
             // Compute successor distance
             double accrual = 1.0;
             if(cell(current).type & (Person | PersonWithSmoke)) {
                 accrual *= occupied_factor;
             }
             double next_distance = current_distance + accrual;
-            
+
             // Process all successors
             for(CellPosition successor: successors) {
                 // Skip processed successors
@@ -347,18 +337,15 @@ void CA::print_statistics() const noexcept
     std::cout << "*********************************************************\n";
     float traveled = moves * cell_width;
     float realtime = time * time_step;
-    assert (evacuated == pedestrians - casualties);
     std::cout << "Total pedestrians                 : " << pedestrians
         << std::endl;
     std::cout << "People evacuated                  : " << evacuated
         << std::endl;
-    std::cout << "Casualties                        : " << casualties
-        << std::endl;
-    std::cout << "Casualties %                      : "
-        << casualties * 1.0 / pedestrians  << std::endl;
 //    std::cout << "Exit total size                   : " << std::endl;
     std::cout << "Total evacuation time             : " << realtime << " s"
         << std::endl;
+    std::cout << "Mean time per person in smoke     : "
+        << smoke_exposed * 0.3 / evacuated << " s" << std::endl;
     std::cout << "Mean evacuation time per person   : "
         << total_time * 0.3 / evacuated << " s" << std::endl;
     std::cout << "Total distance traveled           : " << traveled << " m"

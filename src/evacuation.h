@@ -119,7 +119,7 @@ private:
     int pedestrians;
     int evacuated;
     int time;
-    int casualties;
+    int smoke_exposed;
     int moves;
     int total_time;
 

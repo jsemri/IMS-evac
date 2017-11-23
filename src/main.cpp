@@ -63,10 +63,13 @@ int main(int argc, char **argv) {
         }
 
         std::srand(std::time(0));
+        ca.show();
+        // show initial state for few seconds
+        sleep(2);
         // evolve CA in loop until CA can't change its states
         while (ca.evolve()) {
             /**/Bitmap::display_distances(ca);
-        
+
             // showing the current state of CA
             if (delay > 0) {
                 ca.show();
