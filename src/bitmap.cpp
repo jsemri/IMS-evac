@@ -42,9 +42,9 @@ rgb_t Bitmap::translate(CellType type) {
             return green;
         case Smoke:
             return grey;
-        case SmokeWithPerson:
+        case PersonWithSmoke:
             return lightred;
-        case SmokeWithObstacle:
+        case ObstacleWithSmoke:
             return lightgrey;
         case Obstacle:
             return orange;
@@ -67,7 +67,7 @@ CellType Bitmap::translate(rgb_t rgb) {
     } else if (rgb == orange) {
         return Obstacle;
     } else if (rgb == lightgrey) {
-        return SmokeWithObstacle;
+        return ObstacleWithSmoke;
     }
     else {
         return Wall;

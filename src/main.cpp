@@ -56,15 +56,17 @@ int main(int argc, char **argv) {
     // uncoment for displaying heat map
     Bitmap::display_distances(ca);
     // uncoment this for opening image with xdg-open
-    if (delay > 0)
+    if (delay > 0) {
         std::system("xdg-open output.bmp");
+    }
 
     std::srand(std::time(0));
     // evolve CA in loop until CA can't change its states
     while (ca.evolve()) {
         // showing the current state of CA
-        if (delay > 0)
+        if (delay > 0) {
             ca.show();
+        }
         usleep(delay);
     }
     ca.show();

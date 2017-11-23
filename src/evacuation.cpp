@@ -18,55 +18,37 @@
 
 #define RAND (((double) rand()) / (RAND_MAX))
 #define PROB(val) val > RAND
-#define POW2(x) x*x
-#define POW3(x) x*x*x
 
 #define SMOKE_SPREADING_RATE 0.2
 #define FAINT_DEATH_RATE 0.04
-#define DIRECTION_CHANGE_RATE 0.95
 #define MOVE_NOT_CLOSER_COEF 0.25
 
 using namespace Evacuation;
 
 CA::CA(unsigned y, unsigned x) :
     cells(y, std::vector<Cell>(x)), pedestrians{0}, time{0}, casualties{0},
-    moves{0}, max_distance{-1}
+    moves{0}
 {}
 
 std::vector<CellPosition>
-CA::cell_neighbourhood(size_t row, size_t col) const {
+CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const {
     std::vector<CellPosition> neighbours;
 
-    push_if_empty(neighbours, row - 1, col);
-    push_if_empty(neighbours, row, col - 1);
-    push_if_empty(neighbours, row, col + 1);
-    push_if_empty(neighbours, row + 1, col);
-    push_if_empty(neighbours, row - 1, col - 1);
-    push_if_empty(neighbours, row - 1, col + 1);
-    push_if_empty(neighbours, row + 1, col - 1);
-    push_if_empty(neighbours, row + 1, col + 1);
-
-    return neighbours;
-}
-std::vector<CellPosition>
-CA::cell_neighbourhood2(size_t row, size_t col) const {
-    std::vector<CellPosition> neighbours;
-
-    push_if_empty2(neighbours, row - 1, col);
-    push_if_empty2(neighbours, row, col - 1);
-    push_if_empty2(neighbours, row, col + 1);
-    push_if_empty2(neighbours, row + 1, col);
-    push_if_empty2(neighbours, row - 1, col - 1);
-    push_if_empty2(neighbours, row - 1, col + 1);
-    push_if_empty2(neighbours, row + 1, col - 1);
-    push_if_empty2(neighbours, row + 1, col + 1);
+    push_if(neighbours, row - 1, col, cell_types);
+    push_if(neighbours, row, col - 1, cell_types);
+    push_if(neighbours, row, col + 1, cell_types);
+    push_if(neighbours, row + 1, col, cell_types);
+    push_if(neighbours, row - 1, col - 1, cell_types);
+    push_if(neighbours, row - 1, col + 1, cell_types);
+    push_if(neighbours, row + 1, col - 1, cell_types);
+    push_if(neighbours, row + 1, col + 1, cell_types);
 
     return neighbours;
 }
 
 std::vector<CellPosition>
-CA::cell_neighbourhood(CellPosition position) const {
-    return cell_neighbourhood(position.first, position.second);
+CA::cell_neighbourhood(CellPosition position, int cell_types) const {
+    return cell_neighbourhood(position.first, position.second, cell_types);
 }
 
 bool CA::evolve() {
@@ -84,17 +66,17 @@ bool CA::evolve() {
                 {
                     // propagation of smoke
                     auto neighbours =
-                        cell_neighbourhood2(row, col);
+                        cell_neighbourhood(row, col, SmokeCells);
                     int smoke_prob = 0;
                     for (auto i : neighbours) {
                         smoke_prob +=
                             cell(i).type == Smoke ||
-                            cell(i).type == SmokeWithPerson ||
-                            cell(i).type == SmokeWithObstacle;
+                            cell(i).type == PersonWithSmoke ||
+                            cell(i).type == ObstacleWithSmoke;
                     }
                     if (PROB(smoke_prob / 8.0 * SMOKE_SPREADING_RATE)) {
                         if (current.type == Obstacle)
-                            current.type = SmokeWithObstacle;
+                            current.type = ObstacleWithSmoke;
                         else
                             current.type = Smoke;
                     }
@@ -104,7 +86,7 @@ bool CA::evolve() {
                     // remove people at exits
                     current.type = Exit;
                     break;
-                case SmokeWithPerson:
+                case PersonWithSmoke:
                     // with 0.1 probability person in smoke faints and dies
                     if (PROB(FAINT_DEATH_RATE)) {
                         current.type = Smoke;
@@ -125,6 +107,8 @@ bool CA::evolve() {
     for (auto person : people) {
         auto neighbours = cell_neighbourhood(person);
         if (!neighbours.empty()) {
+            // non-deterministic choice of the minimum
+            shuffle(neighbours);
             // find min value
             CellPosition next_cell = neighbours[0];
             for (auto c : neighbours) {
@@ -133,28 +117,14 @@ bool CA::evolve() {
                 }
             }
 
-            // non-deterministic choice of the minimum
-            for (size_t j = 0; j < neighbours.size(); j++) {
-                if (distance(next_cell) == distance(neighbours[j])) {
-                    next_cell = neighbours[j];
-                    if (cell(next_cell).type == Smoke) {
-                        continue;
-                    }
-                    if (PROB(DIRECTION_CHANGE_RATE)) {
-                        break;
-                    }
-                }
-            }
-
             // distance to the next cell
             int person_distance = distance(person);
             int next_distance = distance(next_cell);
             int diff = person_distance - next_distance;
-            assert (diff == 0 || diff == -1 || diff == 1);
+            // assert (diff == 0 || diff == -1 || diff == 1);
             // move to the cell with lesser exit distance or same distance
             // with some probability
             if (diff == 1 ||
-//                (diff == 0 && PROB(POW2(1.0 * person_distance / max_distance))))
                 (diff == 0 && PROB(MOVE_NOT_CLOSER_COEF)))
             {
                 // move from empty or smoke cell
@@ -163,7 +133,7 @@ bool CA::evolve() {
                     cell(person).type == Person ? Empty : Smoke;
                 auto &next_type = cell(next_cell).type;
                 if (next_type == Smoke) {
-                    next_type = SmokeWithPerson;
+                    next_type = PersonWithSmoke;
                 }
                 else if (next_type == Exit) {
                     next_type = PersonAtExit;
@@ -188,6 +158,7 @@ void CA::add_smoke(int smoke) {
         }
     }
 
+    std::srand(std::time(0));
     shuffle(empty_cells);
     if (smoke > 0 && smoke > empty_cells.size()) {
         throw std::logic_error("cannot have more smoke cells than empty cells");
@@ -221,6 +192,7 @@ void CA::add_people(int people_count) {
         throw std::logic_error("cannot have more people than empty cells");
     }
 
+    std::srand(std::time(0));
     shuffle(empty_priority_cells);
     shuffle(empty_cells);
 
@@ -331,24 +303,12 @@ void CA::recompute_shortest_paths() {
     }
 }
 
-void CA::compute_max_distance() {
-    for(int row = 0; row < height(); row++) {
-        for(int col = 0; col < width(); col++) {
-            if (cells[row][col].exit_distance > max_distance) {
-                max_distance = cells[row][col].exit_distance;
-            }
-        }
-    }
-}
-
 CA CA::load(const std::string &filename) {
     // Load from image
     CA ca = Bitmap::load(filename);
 
     // Resolve distances
     ca.recompute_shortest_paths();
-    // compute max distance
-    ca.compute_max_distance();
 
     // Success
     return ca;

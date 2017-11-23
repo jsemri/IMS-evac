@@ -14,16 +14,16 @@ using CellPosition = std::pair<size_t, size_t>;
 
 /** Type of a cell. */
 enum CellType {
-    Empty = 0,
-    Exit,
-    Wall,
-    Obstacle,
-    Person,
-    Smoke,
-    PersonAppearance,
-    PersonAtExit,
-    SmokeWithPerson,
-    SmokeWithObstacle
+    Empty =            0b0000000001,
+    Exit =             0b0000000010,
+    Wall =             0b0000000100,
+    Obstacle =         0b0000001000,
+    Person =           0b0000010000,
+    Smoke =            0b0000100000,
+    PersonAppearance = 0b0001000000,
+    PersonAtExit =     0b0010000000,
+    PersonWithSmoke =  0b0100000000,
+    ObstacleWithSmoke =0b1000000000
 };
 
 /** Cell structure. */
@@ -36,7 +36,6 @@ struct Cell {
     int col;
     /** Distance (in hops) to nearest exit. */
     unsigned exit_distance;
-    // XXX maybe add more properties for other cell types
 
     Cell() :
         type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
@@ -91,6 +90,9 @@ public:
     }
 
 private:
+    static constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
+    static constexpr int SmokeCells = Smoke | ObstacleWithSmoke
+                                            | PersonWithSmoke;
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
 
@@ -99,39 +101,20 @@ private:
     int time;
     int casualties;
     int moves;
-    int max_distance;
 
     // methods
 
-    /// Return Moore neighbourhood of empty cells at current position.
-    std::vector<CellPosition> cell_neighbourhood(CellPosition position) const;
-    std::vector<CellPosition> cell_neighbourhood(size_t row, size_t col) const;
-    std::vector<CellPosition> cell_neighbourhood2(size_t row, size_t col) const;
+    /// Return Moore neighbourhood of cells of specified type at current
+    /// position. Default returned cell types are defined above.
+    std::vector<CellPosition> cell_neighbourhood(
+        CellPosition position, int cell_types = EmptyCells) const;
+    std::vector<CellPosition> cell_neighbourhood(
+        size_t row, size_t col, int cell_types = EmptyCells) const;
 
     /// Recompute exit distances.
     void recompute_shortest_paths();
 
-    /// Compute max distance.
-    void compute_max_distance();
-
     // Inline methods:
-
-    /// returns true if cell at specified position is empty or it is an exit
-    inline bool is_empty(size_t row, size_t col) const {
-        return cells[row][col].type == Empty ||
-               cells[row][col].type == PersonAppearance ||
-               cells[row][col].type == Smoke ||
-               cells[row][col].type == Exit;
-    };
-
-    /// returns true if cell at specified position is empty or it is an exit
-    inline bool is_empty2(size_t row, size_t col) const {
-        return cells[row][col].type == Empty ||
-               cells[row][col].type == PersonAppearance ||
-               cells[row][col].type == Smoke ||
-               cells[row][col].type == SmokeWithObstacle ||
-               cells[row][col].type == Exit;
-    };
 
     /// returns true if cell coordinates are valid
     inline bool cell_check(int row, int col) const {
@@ -140,18 +123,11 @@ private:
 
     /// push an position(row,col) to the vector if cell at this position is
     /// empty
-    inline void push_if_empty(
-        std::vector<CellPosition> &vec, size_t row, size_t col) const
+    inline void push_if(
+        std::vector<CellPosition> &vec, size_t row, size_t col,
+        int cell_types) const
     {
-        if (cell_check(row, col) && is_empty(row, col)) {
-            vec.push_back(CellPosition(row, col));
-        }
-    }
-
-    inline void push_if_empty2(
-        std::vector<CellPosition> &vec, size_t row, size_t col) const
-    {
-        if (cell_check(row, col) && is_empty2(row, col)) {
+        if (cell_check(row, col) && (cells[row][col].type & cell_types)) {
             vec.push_back(CellPosition(row, col));
         }
     }
