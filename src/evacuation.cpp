@@ -103,6 +103,10 @@ bool CA::evolve()
         }
     }
 
+    // Recompute exit distances
+    recompute_shortest_paths();
+    
+    // Propagate people
     res = !people.empty();
     shuffle(people);
     for (auto person : people) {
@@ -226,22 +230,22 @@ void CA::recompute_shortest_paths()
         }
     }
 
-    // Apply Dijkstra for each exit state and remember minimum distances
+    // Apply Dijkstra for each exit state and keep minimum distances
     while(!exit_states.empty()) {
         // Extract initial state
         CellPosition is = exit_states.front();
         exit_states.pop();
-
+        
         // Initialize distances
-        std::vector<std::vector<unsigned>> distances(
-			height(), std::vector<unsigned>(width())
+        std::vector<std::vector<double>> distances(
+			height(), std::vector<double>(width())
 		);
         for (int row = 0; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
-                distances[row][col] = UINT_MAX;
+                distances[row][col] = (double) UINT_MAX;
             }
         }
-        distances[is.first][is.second] = 0;
+        distances[is.first][is.second] = 0.0;
 
         // Vector of visited states
         std::vector<std::vector<bool>> visited(
@@ -261,15 +265,13 @@ void CA::recompute_shortest_paths()
         while(!unprocessed.empty()) {
 			// Find unprocessed state with minimum exit distance
 			int min = 0;
-			CellPosition *cp_min = &unprocessed[min];
 			for(int i = 1; i < unprocessed.size(); i++) {
 				CellPosition cp = unprocessed[i];
-				if(
-					distances[cp.first][cp.second] <
-					distances[cp_min->first][cp_min->second]
-				) {
-					min = i;
-					cp_min = &unprocessed[min];
+                CellPosition cp_min = unprocessed[min];
+                double d = distances[cp.first][cp.second];
+                double dmin = distances[cp_min.first][cp_min.second];
+				if(d < dmin) {
+                    min = i;
 				}
 			}
 
@@ -280,15 +282,30 @@ void CA::recompute_shortest_paths()
 			visited[current.first][current.second] = true;
             int current_distance = distances[current.first][current.second];
 
+            // Cell types that can be considered adjacent
+            constexpr int succTypes =  Empty | Exit | Person | Smoke 
+                | PersonAppearance | PersonAtExit | PersonWithSmoke;
+                
             // Generate successors
-            std::vector<CellPosition> successors = cell_neighbourhood(current);
+            std::vector<CellPosition> successors;
+            successors = cell_neighbourhood(current, succTypes);
+            
+            // Compute successor distance
+            double accrual = 1.0;
+            if(cell(current).type & (Person | PersonWithSmoke)) {
+                accrual *= occupied_factor;
+            }
+            double next_distance = current_distance + accrual;
+            
+            // Process all successors
             for(CellPosition successor: successors) {
-                // Skip processed successors, update distance
+                // Skip processed successors
                 int r = successor.first, c = successor.second;
                 if(!visited[r][c]) {
                     visited[r][c] = true;
-                    if(current_distance + 1 < distances[r][c]) {
-                        distances[r][c] = current_distance + 1;
+                    // Update distance
+                    if(next_distance < distances[r][c]) {
+                        distances[r][c] = next_distance;
                     }
                     unprocessed.push_back(successor);
                 }
@@ -300,7 +317,7 @@ void CA::recompute_shortest_paths()
             for(int col = 0; col < width(); col++) {
                 Cell &c = cell(row, col);
                 if(distances[row][col] < c.exit_distance) {
-                    c.exit_distance = distances[row][col];
+                    c.exit_distance = (int)distances[row][col];
                 }
             }
         }

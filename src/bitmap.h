@@ -68,7 +68,7 @@ public:
      * Store heat map of exit distances to "distances.bmp".
      * @param ca model to store
      */
-    static void display_distances(Evacuation::CA &ca);
+    static void display_distances(Evacuation::CA &ca, unsigned scale = 10);
 
     /**
       * Produce sample model: square room with one exit.

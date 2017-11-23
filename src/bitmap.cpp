@@ -149,11 +149,11 @@ void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
     image.save_image(filename);
 }
 
-void Bitmap::display_distances(CA &ca) {
+void Bitmap::display_distances(CA &ca, unsigned scale) {
      // Construct image
     int height = ca.height();
     int width = ca.width();
-    bitmap_image image(width, height);
+    bitmap_image image(width*scale, height*scale);
 
     // Construct heat map
     for(int row = 0; row < height; row++) {
@@ -165,7 +165,12 @@ void Bitmap::display_distances(CA &ca) {
             } else {
                 color = jet_colormap[999-distance*5];
             }
-            image.set_pixel(col, row, color);
+            for(unsigned i = 0; i < scale; i++) {
+                for(unsigned j = 0; j < scale; j++) {
+                    image.set_pixel(col*scale+j, row*scale+i, color);
+                }
+            }
+            
         }
     }
 
