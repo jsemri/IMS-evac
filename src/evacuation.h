@@ -22,7 +22,9 @@ const float faint_death_rate = 0.04;
 /// Coefficient of smoke spreading.
 const float smoke_spreading_rate = 0.2;
 /// Occupied cell distance factor (1.0 => usual distance)
-const float occupied_factor = 10.0;
+const float occupied_distance = 2.0;
+/// Effect of smoke on exit distance (1.0 => usual distance)
+const float smoke_distance = 5.0;
 
 /// Position in matrix.
 using CellPosition = std::pair<size_t, size_t>;

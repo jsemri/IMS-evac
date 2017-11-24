@@ -119,7 +119,7 @@ bool CA::evolve()
             // assert (diff == 0 || diff == -1 || diff == 1);
             // move to the cell with lesser exit distance or same distance
             // with some probability
-            if (diff == 1 ||
+            if (diff >= 1 ||
                 (diff == 0 && PROB(chaos_rate)))
             {
                 // move from empty or smoke cell
@@ -274,7 +274,7 @@ void CA::recompute_shortest_paths()
 
             // Cell types that can be considered adjacent
             constexpr int succTypes =  Empty | Exit | Person | Smoke
-                | PersonAppearance | PersonAtExit | PersonWithSmoke;
+               | PersonAppearance | PersonAtExit | PersonWithSmoke;
 
             // Generate successors
             std::vector<CellPosition> successors;
@@ -283,7 +283,10 @@ void CA::recompute_shortest_paths()
             // Compute successor distance
             double accrual = 1.0;
             if(cell(current).type & (Person | PersonWithSmoke)) {
-                accrual *= occupied_factor;
+                accrual *= occupied_distance;
+            }
+            if(cell(current).type & (Smoke | PersonWithSmoke)) {
+                accrual *= smoke_distance;
             }
             double next_distance = current_distance + accrual;
 
