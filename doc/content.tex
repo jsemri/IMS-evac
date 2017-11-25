@@ -12,9 +12,9 @@ assume that the reader is familiar with the basic concepts of CA.
 \subsection{Cells}
 We work with two-dimensional space, where each cell represents a $0.4 \times
 0.4$ meters square. In our model we use \emph{Moore
-Neighbourhood}~\cite{Moore}, where eight cells surround a given cell. We define
-following set of states, which cells can get. The set of possible states is
-following $$Q = \{W,O,P,S,E,EX,PIA,PIS,OIS,PAE\}$$ where the meaning of symbols
+Neighbourhood}~\cite{Moore}, where eight cells surround a given cell.
+The set of possible states $Q$ which each cell can get is following
+$$Q = \{W,O,P,S,E,EX,PIA,PIS,OIS,PAE\}$$ where the meaning of symbols
 is
 \begin{itemize}
     \item W\,--\,Wall
@@ -23,16 +23,17 @@ is
     \item S\,--\,Smoke
     \item E\,--\,Empty cell
     \item EX\,--\,Exit
-    \item PIA\,--\,Person initial appearance
-    \item PIS\,--\,Person in smoke
-    \item OIS\,--\,Obstacle in smoke
-    \item PAE\,--\,Person at the exit
+    \item PIA\,--\,Person Initial Appearance
+    \item PIS\,--\,Person In Smoke
+    \item OIS\,--\,Obstacle In Smoke
+    \item PAE\,--\,Person At the Exit
 \end{itemize}
 
 \subsection{Initial Configuration}
-\subsubsection{Building}
 The initial configuration of walls, obstacles and exits is defined by input
 pixmap. The correctness  of the input is not verified, it is left on a user.
+The initial location of people and smoke is solved by program and it is
+described in next sections.
 \subsubsection{People}
 The location of the people at the beginning of the simulation is by randomly
 distribution over empty cells. Cells with state $E$ and $PIA$ are considered as
@@ -55,13 +56,13 @@ However, here the priority does not have any effect.
     coefficient. Since the ceiling of our modeled buildings is quite high and
     we assume that people do not leave building immediately when fire
     starts, our empirical choice of of the coefficient $C_{SS}$ is 0.25.
-    When a cell is being affected with the smoke its state is changes with
+    When a cell is being affected with the smoke its state is changed with
     respect to the following rules:
     \begin{itemize}
-        \item $E \rightarrow S$, empty cell becomes smoke cell
-        \item $PIA \rightarrow S$, person appearance cell becomes smoke cell
-        \item $O \rightarrow OS$, obstacle becomes obstacle with smoke
-        \item $P \rightarrow PIS$, person becomes person in smoke
+        \item $E \rightarrow S$, an empty cell becomes smoke cell
+        \item $PIA \rightarrow S$, a person appearance cell becomes a smoke cell
+        \item $O \rightarrow OS$, an obstacle becomes an obstacle with smoke
+        \item $P \rightarrow PIS$, a person becomes a person in smoke
     \end{itemize}
     \item The people, cells $P$ and $PIS$, can move to any empty cell in their
     \emph{Moore Neighbourhood}. The allowed empty cells are $E,PIA,S$ and $EX$.
@@ -69,27 +70,62 @@ However, here the priority does not have any effect.
     step. When person moves into specific cell, it changes its state with
     respect to the following rules.
     \begin{itemize}
-        \item $E \rightarrow P$, person moves into an empty cell
-        \item $PIA \rightarrow P$, person moves into appearance cell
-        \item $S \rightarrow PIS$, person moves into smoke and is affected by
-        smoke
-        \item $EX \rightarrow PAE$, person moves into exit, and he is ready to
-        leave a system, in the next evolution step this cell becomes exit
-        again, so it can be occupied by another person
+        \item $E \rightarrow P$, a person moves into an empty cell
+        \item $PIA \rightarrow P$, a person moves into an appearance cell
+        \item $S \rightarrow PIS$, a person moves into a smoke and is affected
+        by smoke
+        \item $EX \rightarrow PAE$, a person moves into an exit, and is
+        ready to leave a system, in the next evolution step this cell becomes
+        exit again, so it can be occupied by another person
     \end{itemize}
     The person's previous position is recovered by its former cell type. The
-    way how the pedestrians moves and behaves is desribed in the next section.
+    way how the pedestrians moves and behaves is described in the next section.
 \end{enumerate}
 
-\subsection{Pedestrains Motion}
+\subsection{Pedestrians Motion}
+Person movement is based on picking the smallest distance to the exit. However,
+to avoid unrealistic motion we try to refine it with some extended features.
 
 \subsubsection{Computing the Distances}
+% XXX dijsktra, recomputing, etc.
 
-\subsubsection{Colisions}
+\subsubsection{Collisions}
+In case a person cannot move to the cell nearer to exit (mostly because of
+another person), the person can move to the cell with same exit distance with
+some probability. This probability is denoted as \emph{chaos}. It was defined
+because of the fact that a person in reality does not immediately know the real
+exit distance. This also simulates by-passing of blocking people and not
+creating unrealistic queues before exits.
 
 \section{Implementation}
+We divide the handling of input and output from application logic. The
+input and output is based on images processing. The application core is briefly
+described in the next section.
 
 \subsection{Cellular Automata}
+We represent CA with class \texttt{CA} under namespace \texttt{Evacuation}.
+Implementation of class \texttt{CA} is quite simple. \texttt{CA} provides
+methods for constructing object from file, computing statistics, outputting an
+image and other useful features. The main function called \texttt{evolve},
+which returns \texttt{true} if there are still some people to evacuate, changes
+state of the automaton. Basically the whole simulation consist of few lines of
+code.
+
+\lstset{language=C++,
+basicstyle=\ttfamily,
+keywordstyle=\color{blue}\ttfamily,
+stringstyle=\color{red}\ttfamily,
+commentstyle=\color{magenta}\ttfamily,
+morecomment=[l][\color{magenta}]{\#}
+}
+\bigskip
+\begin{lstlisting}
+while (ca.evolve() == true)      // evolve until all people are evacuated
+{
+    usleep(simulation_time);     // wait for a while
+    ca.show();                   // show current state of the automaton
+}
+\end{lstlisting}
 
 \subsection{Image Processing}
 % XXX
