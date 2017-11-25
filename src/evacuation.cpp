@@ -62,6 +62,7 @@ bool CA::evolve()
                 case PersonAppearance:
                 case Obstacle:
                 case Empty:
+                case Person:
                 {
                     // propagation of smoke
                     int smoke_neigh =
@@ -70,9 +71,17 @@ bool CA::evolve()
                         if (current.type == Obstacle) {
                             current.type = ObstacleWithSmoke;
                         }
+                        else if (current.type == Person) {
+                            current.type = PersonWithSmoke;
+                            smoke_exposed++;
+                        }
                         else {
                             current.type = Smoke;
                         }
+                    }
+                    if (current.type == Person) {
+                        // remember person position
+                        people.push_back(CellPosition(row, col));
                     }
                     break;
                 }
@@ -84,7 +93,6 @@ bool CA::evolve()
                     break;
                 case PersonWithSmoke:
                     smoke_exposed++;
-                case Person:
                     // remember person position
                     people.push_back(CellPosition(row, col));
                 default:
