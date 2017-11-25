@@ -31,5 +31,5 @@ pack:
 
 # count of standard pages
 norm:
-	echo "scale=2; `detex -n $(CO)-[01]*.tex | wc -c`/1800;" | bc
+	echo "scale=2; `detex -n content.tex | wc -c`/1800;" | bc
 
