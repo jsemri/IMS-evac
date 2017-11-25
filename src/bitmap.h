@@ -1,7 +1,6 @@
 /**
  * @file bitmap.h
  * Bitmap class interface.
- * @author xandri03
  */
 
 #ifndef __bitmap_h
@@ -20,6 +19,8 @@
 class Bitmap {
 
 private:
+    /** Output scaling. */
+    static unsigned scale;
 
     /** Translate cell type to color; unknown types are translated to black. */
     static rgb_t translate(Evacuation::CellType type);
@@ -61,37 +62,20 @@ public:
      * @param scale blow image up
      */
     static void store(
-        Evacuation::CA &ca, const std::string &filename, unsigned scale = 10
+        Evacuation::CA &ca, const std::string &filename
     );
 
     /**
      * Store heat map of exit distances to "distances.bmp".
      * @param ca model to store
      */
-    static void display_distances(Evacuation::CA &ca, unsigned scale = 10);
-
-    /**
-      * Produce sample model: square room with one exit.
-      * @param length room dimensions
-      * @param filename name of output file
-      */
+    static void display_distances(Evacuation::CA &ca);
+/*
     static void sample_1(int length, const std::string &filename);
-
-    /**
-      * Produce sample model: square room with one rectangle obstacle and two
-      * exits.
-      * @param length room dimensions
-      * @param filename name of output file
-      */
     static void sample_2(int length, const std::string &filename);
-
-    /**
-     * Produce sample model: square room, 1 exit, 3 obstacles.
-     * @param length room dimensions
-      * @param filename name of output file
-      */
     static void sample_3(int length, const std::string &filename);
-     static void sample_4(int length, const std::string &filename);
+    static void sample_4(int length, const std::string &filename);
+*/
 };
 
 #endif

@@ -1,7 +1,6 @@
 /**
  * @file bitmap.h
  * Bitmap class implementation.
- * @author xandri03
  */
 
 #include "bitmap.h"
@@ -52,6 +51,8 @@ rgb_t Bitmap::translate(CellType type) {
             return black;
     }
 }
+
+unsigned Bitmap::scale = 10;
 
 CellType Bitmap::translate(rgb_t rgb) {
     if(rgb == white) {
@@ -108,13 +109,13 @@ CA Bitmap::load(const std::string &filename) {
     }
 
     // Read dimensions
-    int height = image.height();
-    int width = image.width();
+    unsigned height = image.height();
+    unsigned width = image.width();
     CA ca(height, width);
 
    // Differentiate colors
-    for(int row = 0; row < height; row++) {
-        for(int col = 0; col < width; col++) {
+    for(unsigned row = 0; row < height; row++) {
+        for(unsigned col = 0; col < width; col++) {
             rgb_t rgb;
             image.get_pixel(col, row, rgb);
             ca.cell(row,col).type = translate(rgb);
@@ -125,16 +126,16 @@ CA Bitmap::load(const std::string &filename) {
     return ca;
 }
 
-void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
+void Bitmap::store(CA &ca, const std::string &filename){
     // Construct image
-    int height = ca.height();
-    int width = ca.width();
+    unsigned height = ca.height;
+    unsigned width = ca.width;
     bitmap_image image(width*scale, height*scale);
     image_drawer pen(image);
 
     // Differentiate types
-    for(int row = 0; row < height; row++) {
-        for(int col = 0; col < width; col++) {
+    for(unsigned row = 0; row < height; row++) {
+        for(unsigned col = 0; col < width; col++) {
             // Draw (scaled) cell
             pick(pen, ca.cell(row, col).type);
             for(unsigned i = 0; i < scale; i++) {
@@ -149,15 +150,15 @@ void Bitmap::store(CA &ca, const std::string &filename, unsigned scale){
     image.save_image(filename);
 }
 
-void Bitmap::display_distances(CA &ca, unsigned scale) {
+void Bitmap::display_distances(CA &ca) {
      // Construct image
-    int height = ca.height();
-    int width = ca.width();
+    unsigned height = ca.height;
+    unsigned width = ca.width;
     bitmap_image image(width*scale, height*scale);
 
     // Construct heat map
-    for(int row = 0; row < height; row++) {
-        for(int col = 0; col < width; col++) {
+    for(unsigned row = 0; row < height; row++) {
+        for(unsigned col = 0; col < width; col++) {
             unsigned distance = ca.cell(row,col).exit_distance;
             rgb_t color;
             if(distance >= 200) {
@@ -178,9 +179,10 @@ void Bitmap::display_distances(CA &ca, unsigned scale) {
     image.save_image("distances.bmp");
 }
 
+/*
 void Bitmap::sample_1(int length, const std::string &filename) {
     // Construct image
-    int width = length, height = length;
+    unsigned width = length, height = length;
     bitmap_image image(width, height);
     image_drawer pen(image);
 
@@ -204,7 +206,7 @@ void Bitmap::sample_1(int length, const std::string &filename) {
 
 void Bitmap::sample_2(int length, const std::string &filename) {
     // Construct image
-    int width = length, height = length;
+    unsigned width = length, height = length;
     bitmap_image image(width, height);
     image_drawer pen(image);
 
@@ -233,7 +235,7 @@ void Bitmap::sample_2(int length, const std::string &filename) {
 
 void Bitmap::sample_3(int length, const std::string &filename) {
     // Construct image
-    int width = length, height = length;
+    unsigned width = length, height = length;
     bitmap_image image(width, height);
     image_drawer pen(image);
 
@@ -263,7 +265,7 @@ void Bitmap::sample_3(int length, const std::string &filename) {
 
 void Bitmap::sample_4(int length, const std::string &filename) {
     // Construct image
-    int width = length, height = length;
+    unsigned width = length, height = length;
     bitmap_image image(width, height);
     image_drawer pen(image);
 
@@ -286,3 +288,4 @@ void Bitmap::sample_4(int length, const std::string &filename) {
     // Output
     image.save_image(filename);
 }
+*/

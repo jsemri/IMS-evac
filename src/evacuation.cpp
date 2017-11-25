@@ -1,3 +1,8 @@
+/**
+ * @file evacuation.cpp
+ * Cellular automaton definition.
+ */
+
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
 
@@ -21,13 +26,15 @@
 
 using namespace Evacuation;
 
-CA::CA(unsigned y, unsigned x) :
-    cells(y, std::vector<Cell>(x)), pedestrians{0}, evacuated{0},
+CA::CA(unsigned height, unsigned width) :
+    height{height}, width{width},
+    cells(height, std::vector<Cell>(width)), pedestrians{0}, evacuated{0},
     time{0}, smoke_exposed{0}, moves{0}, total_time{0}
 {}
 
-std::vector<CellPosition>
-CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const
+std::vector<CellPosition> CA::cell_neighbourhood(
+    size_t row, size_t col, int cell_types
+) const
 {{{
     std::vector<CellPosition> neighbours;
 
@@ -43,8 +50,9 @@ CA::cell_neighbourhood(size_t row, size_t col, int cell_types) const
     return neighbours;
 }}}
 
-std::vector<CellPosition>
-CA::cell_neighbourhood(CellPosition position, int cell_types) const
+std::vector<CellPosition> CA::cell_neighbourhood(
+    CellPosition position, int cell_types
+) const
 {{{
     return cell_neighbourhood(position.first, position.second, cell_types);
 }}}
@@ -55,8 +63,8 @@ bool CA::evolve()
     time++;
 
     std::vector<CellPosition> people;
-    for (size_t row = 0; row < height(); row++) {
-        for (size_t col = 0; col < width(); col++) {
+    for (size_t row = 0; row < this->height; row++) {
+        for (size_t col = 0; col < this->width; col++) {
             auto &current = cells[row][col];
             switch (current.type) {
                 case PersonAppearance:
@@ -154,15 +162,14 @@ bool CA::evolve()
 void CA::add_smoke(int smoke)
 {{{
     std::vector<CellPosition> empty_cells;
-    for (size_t i = 0; i < height(); i++) {
-        for (size_t j = 0; j < width(); j++) {
+    for (size_t i = 0; i < this->height; i++) {
+        for (size_t j = 0; j < this->width; j++) {
             if (cells[i][j].type == Empty) {
                 empty_cells.push_back(CellPosition(i,j));
             }
         }
     }
 
-    std::srand(std::time(0));
     shuffle(empty_cells);
     if (smoke > 0 && smoke > empty_cells.size()) {
         throw std::logic_error("cannot have more smoke cells than empty cells");
@@ -182,8 +189,8 @@ void CA::add_people(int people_count)
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
     // mark all cells with possible person appearance
-    for (size_t i = 0; i < height(); i++) {
-        for (size_t j = 0; j < width(); j++) {
+    for (size_t i = 0; i < this->height; i++) {
+        for (size_t j = 0; j < this->width; j++) {
             if (cells[i][j].type == Empty) {
                 empty_cells.push_back(CellPosition(i,j));
             }
@@ -197,7 +204,6 @@ void CA::add_people(int people_count)
         throw std::logic_error("cannot have more people than empty cells");
     }
 
-    std::srand(std::time(0));
     shuffle(empty_priority_cells);
     shuffle(empty_cells);
 
@@ -216,8 +222,8 @@ void CA::recompute_shortest_paths()
 {{{
     // Identify exit states
     std::queue<CellPosition> exit_states;
-    for (int row = 0; row < height(); row++) {
-        for (int col = 0; col < width(); col++) {
+    for (int row = 0; row < this->height; row++) {
+        for (int col = 0; col < this->width; col++) {
             Cell &c = cell(row, col);
             if(c.type == Exit) {
                 c.exit_distance = 0;
@@ -236,10 +242,10 @@ void CA::recompute_shortest_paths()
 
         // Initialize distances
         std::vector<std::vector<double>> distances(
-			height(), std::vector<double>(width())
+			this->height, std::vector<double>(this->width)
 		);
-        for (int row = 0; row < height(); row++) {
-            for (int col = 0; col < width(); col++) {
+        for (int row = 0; row < this->height; row++) {
+            for (int col = 0; col < this->width; col++) {
                 distances[row][col] = (double) UINT_MAX;
             }
         }
@@ -247,10 +253,10 @@ void CA::recompute_shortest_paths()
 
         // Vector of visited states
         std::vector<std::vector<bool>> visited(
-			height(), std::vector<bool>(width())
+			this->height, std::vector<bool>(this->width)
 		);
-        for (int row = 0; row < height(); row++) {
-            for (int col = 0; col < width(); col++) {
+        for (int row = 0; row < this->height; row++) {
+            for (int col = 0; col < this->width; col++) {
                 visited[row][col] = false;
             }
         }
@@ -314,8 +320,8 @@ void CA::recompute_shortest_paths()
         }
 
         // Pick best distance
-        for(int row = 0; row < height(); row++) {
-            for(int col = 0; col < width(); col++) {
+        for(int row = 0; row < this->height; row++) {
+            for(int col = 0; col < this->width; col++) {
                 Cell &c = cell(row, col);
                 if(distances[row][col] < c.exit_distance) {
                     c.exit_distance = (int)distances[row][col];
@@ -356,9 +362,9 @@ void CA::print_statistics() const noexcept
     std::cout << "Total evacuation time             : " << realtime << " s"
         << std::endl;
     std::cout << "Mean time per person in smoke     : "
-        << smoke_exposed * 0.3 / evacuated << " s" << std::endl;
+        << smoke_exposed * time_step / evacuated << " s" << std::endl;
     std::cout << "Mean evacuation time per person   : "
-        << total_time * 0.3 / evacuated << " s" << std::endl;
+        << total_time * time_step / evacuated << " s" << std::endl;
     std::cout << "Total distance traveled           : " << traveled << " m"
         << std::endl;
     std::cout << "Mean distance traveled per person : "

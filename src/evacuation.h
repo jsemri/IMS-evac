@@ -1,3 +1,8 @@
+/**
+ * @file evacuation.h
+ * Cell & CA interfaces.
+ */
+
 #ifndef __evacuation_h
 #define __evacuation_h
 
@@ -9,16 +14,14 @@
 
 namespace Evacuation {
 
-/// Simulation constant parameters
+// Simulation parameters:
 
-/// real seconds per simulation step
+/// Real seconds per simulation step
 const float time_step = 0.3;
-/// width of a cell in meters
+/// Width of a cell in meters
 const float cell_width = 0.4;
 /// Probability that person moves to cell with same exit distance
 const float chaos_rate = 0.25;
-/// Probability that person in smoke cells faints and suddenly dies.
-const float faint_death_rate = 0.04;
 /// Coefficient of smoke spreading.
 const float smoke_spreading_rate = 0.2;
 /// Occupied cell distance factor (1.0 => usual distance)
@@ -43,7 +46,7 @@ enum CellType {
     ObstacleWithSmoke = 0b1000000000
 };
 
-/// Groups of cell types used for cell filtering
+// Groups of cell types used for cell filtering
 
 /// Cells where person can move into.
 constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
@@ -58,7 +61,7 @@ struct Cell {
     int row;
     /** Distance to left border. */
     int col;
-    /** Distance (in hops) to nearest exit. */
+    /** Distance (in pseudo-hops) to nearest exit. */
     unsigned exit_distance;
 
     Cell() :
@@ -66,8 +69,17 @@ struct Cell {
     {}
 };
 
+/**
+ * Cellular automaton.
+ * The state space is assumed to be 2-dimensional and constant.
+ */
 class CA {
 public:
+    /// Number of rows
+    unsigned height;
+    /// Number of columns in EACH row
+    unsigned width;
+
     CA(unsigned height, unsigned width);
     ~CA() = default;
 
@@ -93,20 +105,10 @@ public:
     /// Store model description to "output.bmp".
     void show();
 
+    /// Display simulation statistics. TODO
     void print_statistics() const noexcept;
 
     // Inline methods:
-
-    /// Dimension getter: number of rows
-    inline int height() const {
-        return cells.size();
-    }
-
-    /// Dimension getter: number of columns
-    inline int width() const {
-        assert(!cells.empty());
-        return cells[0].size();
-    }
 
     /// Retrieve a cell at a specified position
     inline Cell& cell(int row, int col) {
@@ -117,7 +119,7 @@ private:
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
 
-    /// variables for computing some statistics
+    /// variables for computing some statistics TODO
     int pedestrians;
     int evacuated;
     int time;
@@ -130,18 +132,23 @@ private:
     /// Return Moore neighbourhood of cells of specified type at current
     /// position. Default returned cell types are defined above.
     std::vector<CellPosition> cell_neighbourhood(
-        CellPosition position, int cell_types = EmptyCells) const;
+        CellPosition position, int cell_types = EmptyCells
+    ) const;
     std::vector<CellPosition> cell_neighbourhood(
-        size_t row, size_t col, int cell_types = EmptyCells) const;
+        size_t row, size_t col, int cell_types = EmptyCells
+    ) const;
 
     /// Recompute exit distances.
     void recompute_shortest_paths();
 
     // Inline methods:
 
-    /// returns true if cell coordinates are valid
+    /// @ return true if cell coordinates are valid
     inline bool cell_check(int row, int col) const {
-        return row >= 0 && row < height() && col >= 0 && col < width();
+        if(row < 0 || col < 0) {
+            return false;
+        }
+        return (unsigned) row < this->height && (unsigned) col < this->width;
     }
 
     /// push an position(row,col) to the vector if cell at this position is
