@@ -53,19 +53,34 @@ constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
 /// Cells which have an impact of smoke propagation.
 constexpr int SmokeCells = Smoke | ObstacleWithSmoke | PersonWithSmoke;
 
+/** Simulation statistics. */
+class Statistics {
+public:
+    int pedestrians;
+    int evacuated;
+    int time;
+    int smoke_exposed;
+    int moves;
+    int total_time;
+
+	Statistics() :
+		pedestrians{0}, evacuated{0}, time{0},
+		smoke_exposed{0}, moves{0}, total_time{0}
+    {}
+
+    /** String representation of statistics. */
+    std::string str() const noexcept;
+};
+
 /** Cell structure. */
 struct Cell {
     /** Cell type. */
     CellType type;
-    /** Distance to upper border. */
-    int row;
-    /** Distance to left border. */
-    int col;
     /** Distance (in pseudo-hops) to nearest exit. */
     unsigned exit_distance;
 
     Cell() :
-        type{Empty}, row{-1}, col{-1}, exit_distance{UINT_MAX}
+        type{Empty}, exit_distance{UINT_MAX}
     {}
 };
 
@@ -77,8 +92,10 @@ class CA {
 public:
     /// Number of rows
     unsigned height;
-    /// Number of columns in EACH row
+    /// Number of columns in each row
     unsigned width;
+    /// Simulation statistics
+    Statistics stat;
     /// Precomuted vector of exit states
     std::vector<CellPosition> exits;
 
@@ -107,7 +124,7 @@ public:
     /// Store model description to "output.bmp".
     void show();
 
-    /// Display simulation statistics. TODO
+    /// Display simulation statistics.
     void print_statistics() const noexcept;
 
     // Inline methods:
@@ -120,14 +137,6 @@ public:
 private:
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
-
-    /// variables for computing some statistics TODO
-    int pedestrians;
-    int evacuated;
-    int time;
-    int smoke_exposed;
-    int moves;
-    int total_time;
 
     // methods
 
@@ -180,9 +189,6 @@ private:
     }
 };
 
-class Statistics {
-
-};
 } // end of namespace
 
 #endif

@@ -17,7 +17,9 @@
  * Simulate once and deliver statistics.
  * TODO
  */
-static void simulate(char *filename, int delay, int people, int smoke);
+static Evacuation::Statistics simulate(
+    char *filename, int delay, int people, int smoke
+);
 
 /** --help string. */
 static const char *helpstr =
@@ -65,7 +67,8 @@ int main(int argc, char **argv) {
     char *filename = argv[opt_cnt];
 
     // Simulate once and display statistics
-    simulate(filename, delay, people, smoke);
+    Evacuation::Statistics stat = simulate(filename, delay, people, smoke);
+    std::cout << stat.str();
 
     // Success
     return EXIT_SUCCESS;
@@ -73,7 +76,9 @@ int main(int argc, char **argv) {
 
 // Definitions
 
-static void simulate(char *filename, int delay, int people, int smoke) {
+static Evacuation::Statistics simulate(
+    char *filename, int delay, int people, int smoke
+) {
     try {
         // Seed
         std::srand(std::time(0));
@@ -108,7 +113,7 @@ static void simulate(char *filename, int delay, int people, int smoke) {
         
         // Show the final state of CA and collect statistics
         ca.show();
-        ca.print_statistics();
+        return ca.stat;
     }
     catch (std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

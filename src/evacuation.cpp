@@ -14,6 +14,7 @@
 
 #include <climits>
 #include <queue>
+#include <sstream>
 
 #include "evacuation.h"
 #include "bitmap.h"
@@ -28,18 +29,8 @@ using namespace Evacuation;
 
 CA::CA(unsigned height, unsigned width) :
     height{height}, width{width},
-    cells(height, std::vector<Cell>(width)), pedestrians{0}, evacuated{0},
-    time{0}, smoke_exposed{0}, moves{0}, total_time{0}
-{
-	for (unsigned row = 0; row < this->height; row++) {
-		auto &vec = cells[row];
-        for (unsigned col = 0; col < this->width; col++) {
-            auto &current = vec[col];
-            current.row = row;
-            current.col = col;
-        }
-	}
-}
+    cells(height, std::vector<Cell>(width))
+{}
 
 std::vector<CellPosition> CA::cell_neighbourhood(
     size_t row, size_t col, int cell_types
@@ -69,7 +60,7 @@ std::vector<CellPosition> CA::cell_neighbourhood(
 bool CA::evolve()
 {{{
     bool res = false;
-    time++;
+    stat.time++;
 
     std::vector<CellPosition> people;
     for (size_t row = 0; row < this->height; row++) {
@@ -90,7 +81,7 @@ bool CA::evolve()
                         }
                         else if (current.type == Person) {
                             current.type = PersonWithSmoke;
-                            smoke_exposed++;
+                            stat.smoke_exposed++;
                         }
                         else {
                             current.type = Smoke;
@@ -104,12 +95,12 @@ bool CA::evolve()
                 }
                 case PersonAtExit:
                     // remove people at exits
-                    evacuated++;
-                    total_time += time;
+                    stat.evacuated++;
+                    stat.total_time += stat.time;
                     current.type = Exit;
                     break;
                 case PersonWithSmoke:
-                    smoke_exposed++;
+                    stat.smoke_exposed++;
                     // remember person position
                     people.push_back(CellPosition(row, col));
                 default:
@@ -148,7 +139,7 @@ bool CA::evolve()
                 (diff == 0 && PROB(chaos_rate)))
             {
                 // move from empty or smoke cell
-                moves++;
+                stat.moves++;
                 cell(person).type =
                     cell(person).type == Person ? Empty : Smoke;
                 auto &next_type = cell(next_cell).type;
@@ -194,7 +185,7 @@ void CA::add_smoke(int smoke)
 // somehow distribute people over empty cells
 void CA::add_people(int people_count)
 {{{ 
-    pedestrians = people_count;
+    stat.pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
     // mark all cells with possible person appearance
@@ -344,14 +335,14 @@ CA CA::load(const std::string &filename)
     CA ca = Bitmap::load(filename);
 
     // Identify exit states
-    for(auto &row : ca.cells) {
-    	for(auto &c : row) {
-			if(c.type == Exit) {
-                ca.exits.push_back(CellPosition(c.row, c.col));
+    for(unsigned row = 0; row < ca.height; row++) {
+        for(unsigned col = 0; col < ca.width; col++) {
+        	if(ca.cell(row, col).type == Exit) {
+                ca.exits.push_back(CellPosition(row,col));
             }
-    	}
+        }
     }
-     
+
     // Resolve distances
     ca.recompute_shortest_paths();
 
@@ -366,24 +357,33 @@ void CA::show()
 
 void CA::print_statistics() const noexcept
 {{{
+	std::cout << stat.str();
+}}}
+
+
+std::string Statistics::str() const noexcept
+{{{
+	std::ostringstream ss;
     // TODO exits - number, size, loading
-    std::cout << "*********************************************************\n";
+    ss << "*********************************************************\n";
     float traveled = moves * cell_width;
     float realtime = time * time_step;
-    std::cout << "Total pedestrians                 : " << pedestrians
+    ss << "Total pedestrians                 : " << pedestrians
         << std::endl;
-    std::cout << "People evacuated                  : " << evacuated
+    ss << "People evacuated                  : " << evacuated
         << std::endl;
 //    std::cout << "Exit total size                   : " << std::endl;
-    std::cout << "Total evacuation time             : " << realtime << " s"
+    ss << "Total evacuation time             : " << realtime << " s"
         << std::endl;
-    std::cout << "Mean time per person in smoke     : "
+    ss << "Mean time per person in smoke     : "
         << smoke_exposed * time_step / evacuated << " s" << std::endl;
-    std::cout << "Mean evacuation time per person   : "
+    ss << "Mean evacuation time per person   : "
         << total_time * time_step / evacuated << " s" << std::endl;
-    std::cout << "Total distance traveled           : " << traveled << " m"
+    ss << "Total distance traveled           : " << traveled << " m"
         << std::endl;
-    std::cout << "Mean distance traveled per person : "
+    ss << "Mean distance traveled per person : "
         << traveled / pedestrians << " m" << std::endl;
-    std::cout << "*********************************************************\n";
+    ss << "*********************************************************\n";
+
+    return ss.str();
 }}}
