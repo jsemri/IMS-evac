@@ -60,7 +60,7 @@ std::vector<CellPosition> CA::cell_neighbourhood(
 bool CA::evolve()
 {{{
     bool res = false;
-    stat.time++;
+    stat.time += 1;
 
     std::vector<CellPosition> people;
     for (size_t row = 0; row < this->height; row++) {
@@ -81,7 +81,7 @@ bool CA::evolve()
                         }
                         else if (current.type == Person) {
                             current.type = PersonWithSmoke;
-                            stat.smoke_exposed++;
+                            stat.smoke_exposed += 1;
                         }
                         else {
                             current.type = Smoke;
@@ -95,12 +95,11 @@ bool CA::evolve()
                 }
                 case PersonAtExit:
                     // remove people at exits
-                    stat.evacuated++;
-                    stat.total_time += stat.time;
+                    stat.evac_time += stat.time;
                     current.type = Exit;
                     break;
                 case PersonWithSmoke:
-                    stat.smoke_exposed++;
+                    stat.smoke_exposed += 1;
                     // remember person position
                     people.push_back(CellPosition(row, col));
                 default:
@@ -139,7 +138,7 @@ bool CA::evolve()
                 (diff == 0 && PROB(chaos_rate)))
             {
                 // move from empty or smoke cell
-                stat.moves++;
+                stat.moves += 1;
                 cell(person).type =
                     cell(person).type == Person ? Empty : Smoke;
                 auto &next_type = cell(next_cell).type;
@@ -370,15 +369,13 @@ std::string Statistics::str() const noexcept
     float realtime = time * time_step;
     ss << "Total pedestrians                 : " << pedestrians
         << std::endl;
-    ss << "People evacuated                  : " << evacuated
-        << std::endl;
 //    std::cout << "Exit total size                   : " << std::endl;
     ss << "Total evacuation time             : " << realtime << " s"
         << std::endl;
     ss << "Mean time per person in smoke     : "
-        << smoke_exposed * time_step / evacuated << " s" << std::endl;
+        << smoke_exposed * time_step / pedestrians << " s" << std::endl;
     ss << "Mean evacuation time per person   : "
-        << total_time * time_step / evacuated << " s" << std::endl;
+        << evac_time * time_step / pedestrians << " s" << std::endl;
     ss << "Total distance traveled           : " << traveled << " m"
         << std::endl;
     ss << "Mean distance traveled per person : "
@@ -387,3 +384,18 @@ std::string Statistics::str() const noexcept
 
     return ss.str();
 }}}
+
+void Statistics::aggregate(Statistics *other) {
+	time += other->time;
+	smoke_exposed += other->smoke_exposed;
+	moves += other->moves;
+	evac_time += other->evac_time;
+	runs += other->runs;
+}
+
+void Statistics::normalize() {
+	time /= runs;	
+	smoke_exposed /= runs;
+	moves /= runs;
+	evac_time /= runs;
+}

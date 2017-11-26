@@ -53,23 +53,38 @@ constexpr int EmptyCells = Empty | Smoke | PersonAppearance | Exit;
 /// Cells which have an impact of smoke propagation.
 constexpr int SmokeCells = Smoke | ObstacleWithSmoke | PersonWithSmoke;
 
-/** Simulation statistics. */
+/**
+ * Simulation (aggregated) statistics.
+ * Some values were converted to floating point for aggregation.
+ */
 class Statistics {
 public:
+	/** Initial number of pedestrians. */
     int pedestrians;
-    int evacuated;
-    int time;
-    int smoke_exposed;
-    int moves;
-    int total_time;
+    /** Extraction time (steps). */
+    double time;
+    /** Total time (steps) people were exposed to smoke. */
+    double smoke_exposed;
+    /** Total travel time (steps). */
+    double moves;
+    /** Evacuation time (steps). */
+    double evac_time;
+    /** Number of simulations. */
+    int runs;
 
 	Statistics() :
-		pedestrians{0}, evacuated{0}, time{0},
-		smoke_exposed{0}, moves{0}, total_time{0}
+		pedestrians{0}, time{0.0}, smoke_exposed{0.0},
+		moves{0.0}, evac_time{0.0}, runs{1}
     {}
 
     /** String representation of statistics. */
     std::string str() const noexcept;
+
+    /** Aggregate statistics. */
+    void aggregate(Statistics *other);
+
+    /** Normalize statistics for final output. */
+    void normalize();
 };
 
 /** Cell structure. */
@@ -96,8 +111,6 @@ public:
     unsigned width;
     /// Simulation statistics
     Statistics stat;
-    /// Precomuted vector of exit states
-    std::vector<CellPosition> exits;
 
     CA(unsigned height, unsigned width);
     ~CA() = default;
@@ -137,6 +150,8 @@ public:
 private:
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
+    /// Precomuted vector of exit states
+    std::vector<CellPosition> exits;
 
     // methods
 
