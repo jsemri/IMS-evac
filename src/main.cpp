@@ -80,7 +80,7 @@ static void simulate(char *filename, int delay, int people, int smoke) {
         
         // Load model from a bitmap
         Evacuation::CA ca = Evacuation::CA::load(filename);
-
+    
         // Populate the model and add smoke
         ca.add_people(people);
         ca.add_smoke(smoke);

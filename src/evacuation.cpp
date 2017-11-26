@@ -30,7 +30,16 @@ CA::CA(unsigned height, unsigned width) :
     height{height}, width{width},
     cells(height, std::vector<Cell>(width)), pedestrians{0}, evacuated{0},
     time{0}, smoke_exposed{0}, moves{0}, total_time{0}
-{}
+{
+	for (unsigned row = 0; row < this->height; row++) {
+		auto &vec = cells[row];
+        for (unsigned col = 0; col < this->width; col++) {
+            auto &current = vec[col];
+            current.row = row;
+            current.col = col;
+        }
+	}
+}
 
 std::vector<CellPosition> CA::cell_neighbourhood(
     size_t row, size_t col, int cell_types
@@ -184,7 +193,7 @@ void CA::add_smoke(int smoke)
 
 // somehow distribute people over empty cells
 void CA::add_people(int people_count)
-{{{
+{{{ 
     pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
@@ -220,72 +229,64 @@ void CA::add_people(int people_count)
 
 void CA::recompute_shortest_paths()
 {{{
-    // Identify exit states
-    std::queue<CellPosition> exit_states;
-    for (int row = 0; row < this->height; row++) {
-        for (int col = 0; col < this->width; col++) {
-            Cell &c = cell(row, col);
-            if(c.type == Exit) {
-                c.exit_distance = 0;
-                exit_states.push(CellPosition(row, col));
-            } else {
-                c.exit_distance = UINT_MAX;
-            }
+    // Reset exit distances
+    std::vector<std::vector<double>> min_distances(
+		this->height, std::vector<double>(this->width)
+	);
+    for (unsigned row = 0; row < this->height; row++) {
+        for (unsigned col = 0; col < this->width; col++) {
+            min_distances[row][col] = (double)UINT_MAX;
         }
     }
-
+    
     // Apply Dijkstra for each exit state and keep minimum distances
-    while(!exit_states.empty()) {
-        // Extract initial state
-        CellPosition is = exit_states.front();
-        exit_states.pop();
-
-        // Initialize distances
+    for(auto es: exits) {
+    	// Initialize current distances
         std::vector<std::vector<double>> distances(
 			this->height, std::vector<double>(this->width)
 		);
-        for (int row = 0; row < this->height; row++) {
-            for (int col = 0; col < this->width; col++) {
+        for (unsigned row = 0; row < this->height; row++) {
+        	for (unsigned col = 0; col < this->width; col++) {
                 distances[row][col] = (double) UINT_MAX;
             }
         }
-        distances[is.first][is.second] = 0.0;
+        distances[es.first][es.second] = 0.0;
 
         // Vector of visited states
         std::vector<std::vector<bool>> visited(
 			this->height, std::vector<bool>(this->width)
 		);
-        for (int row = 0; row < this->height; row++) {
-            for (int col = 0; col < this->width; col++) {
+        for (unsigned row = 0; row < this->height; row++) {
+            for (unsigned col = 0; col < this->width; col++) {
                 visited[row][col] = false;
             }
         }
 
         // Queue of unprocessed successors
         std::vector<CellPosition> unprocessed;
-        unprocessed.push_back(is);
+        unprocessed.push_back(es);
 
         // Compute distances
         while(!unprocessed.empty()) {
 			// Find unprocessed state with minimum exit distance
+			CellPosition current = unprocessed[0];
 			int min = 0;
+			double current_distance = distances[current.first][current.second];
 			for(int i = 1; i < unprocessed.size(); i++) {
 				CellPosition cp = unprocessed[i];
-                CellPosition cp_min = unprocessed[min];
                 double d = distances[cp.first][cp.second];
-                double dmin = distances[cp_min.first][cp_min.second];
-				if(d < dmin) {
+                if(d < current_distance) {
                     min = i;
+                    current = cp;
+                    current_distance = d;
 				}
 			}
 
-			// Extract minimum
-            CellPosition current = unprocessed[min];
-			unprocessed[min] = unprocessed.back();
+			// Visit minimum
+            unprocessed[min] = unprocessed.back();
 			unprocessed.pop_back();
 			visited[current.first][current.second] = true;
-            int current_distance = distances[current.first][current.second];
-
+            
             // Cell types that can be considered adjacent
             constexpr int succTypes =  Empty | Exit | Person | Smoke
                | PersonAppearance | PersonAtExit | PersonWithSmoke;
@@ -320,13 +321,19 @@ void CA::recompute_shortest_paths()
         }
 
         // Pick best distance
-        for(int row = 0; row < this->height; row++) {
-            for(int col = 0; col < this->width; col++) {
-                Cell &c = cell(row, col);
-                if(distances[row][col] < c.exit_distance) {
-                    c.exit_distance = (int)distances[row][col];
+        for(unsigned row = 0; row < this->height; row++) {
+            for(unsigned col = 0; col < this->width; col++) {
+                if(distances[row][col] < min_distances[row][col]) {
+                    min_distances[row][col] = distances[row][col];
                 }
             }
+        }
+    }
+
+    // Store final result
+    for(unsigned row = 0; row < this->height; row++) {
+        for(unsigned col = 0; col < this->width; col++) {
+        	cell(row,col).exit_distance = min_distances[row][col];
         }
     }
 }}}
@@ -336,6 +343,15 @@ CA CA::load(const std::string &filename)
     // Load from image
     CA ca = Bitmap::load(filename);
 
+    // Identify exit states
+    for(auto &row : ca.cells) {
+    	for(auto &c : row) {
+			if(c.type == Exit) {
+                ca.exits.push_back(CellPosition(c.row, c.col));
+            }
+    	}
+    }
+     
     // Resolve distances
     ca.recompute_shortest_paths();
 

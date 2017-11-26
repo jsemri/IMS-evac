@@ -79,6 +79,8 @@ public:
     unsigned height;
     /// Number of columns in EACH row
     unsigned width;
+    /// Precomuted vector of exit states
+    std::vector<CellPosition> exits;
 
     CA(unsigned height, unsigned width);
     ~CA() = default;
@@ -178,6 +180,9 @@ private:
     }
 };
 
+class Statistics {
+
+};
 } // end of namespace
 
 #endif

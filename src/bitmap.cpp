@@ -1,5 +1,5 @@
 /**
- * @file bitmap.h
+ * @file bitmap.cpp
  * Bitmap class implementation.
  */
 
@@ -112,10 +112,10 @@ CA Bitmap::load(const std::string &filename) {
     unsigned height = image.height();
     unsigned width = image.width();
     CA ca(height, width);
-
-   // Differentiate colors
-    for(unsigned row = 0; row < height; row++) {
-        for(unsigned col = 0; col < width; col++) {
+	
+	// Differentiate colors
+   	for(unsigned row = 0; row < height; row++) {
+		for(unsigned col = 0; col < width; col++) {
             rgb_t rgb;
             image.get_pixel(col, row, rgb);
             ca.cell(row,col).type = translate(rgb);
