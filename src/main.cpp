@@ -13,6 +13,9 @@
 #include "evacuation.h"
 #include "bitmap.h"    // remove after debug
 
+/** Number of simulations to perform. */
+constexpr int simulations = 1;
+
 /** --help string. */
 static const char *helpstr =
 "Program for simulating evacuation of building.\n"
@@ -84,7 +87,7 @@ int main(int argc, char **argv) {
         // Simulate n times and display aggregate statistics
         Evacuation::Statistics stat;
         stat.pedestrians = people;
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < simulations; i++) {
             // Copy the CA
             Evacuation::CA ca = model.copy();
 
@@ -92,16 +95,17 @@ int main(int argc, char **argv) {
             while (ca.evolve()) {
                 if (delay > 0) {
                     // Show the current state of CA
+                    Bitmap::display_distances(ca);
                     ca.show();
                     usleep(delay);
                 }
             }
 
             // Show the final state of CA
-            ca.show();  // comment this for statistic collecting
+            //ca.show();  // comment this for statistic collecting
 
             // Collect statistics
-            std::cout << ca.stat.str();
+            //std::cout << ca.stat.str();
             stat.aggregate(ca.stat);
             stat.runs++;
         }

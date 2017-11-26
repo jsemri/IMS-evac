@@ -151,7 +151,7 @@ private:
     /// 2D matrix of cells.
     std::vector<std::vector<Cell>> cells;
     /// Precomuted vector of exit states
-    std::vector<CellPosition> exits;
+    std::vector<CellPosition> exit_states;
 
     // methods
 

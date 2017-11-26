@@ -97,6 +97,7 @@ bool CA::evolve()
                     // remove people at exits
                     stat.evac_time += stat.time;
                     current.type = Exit;
+                    //std::cout << "FIXME when -p 1" << std::endl;
                     break;
                 case PersonWithSmoke:
                     stat.smoke_exposed += 1;
@@ -217,6 +218,117 @@ void CA::add_people(int people_count)
     }
 }}}
 
+void CA::recompute_shortest_paths() {
+    // Reset exit distances
+    std::vector<std::vector<double>> distances(
+		this->height, std::vector<double>(this->width)
+	);
+
+	// State distance accruals
+    std::vector<std::vector<double>> accruals(
+		this->height, std::vector<double>(this->width)
+	);
+	
+	// Vector of visited states
+    std::vector<std::vector<bool>> visited(
+		this->height, std::vector<bool>(this->width)
+	);
+	
+	// Vector of pushed states
+    std::vector<std::vector<bool>> pushed(
+		this->height, std::vector<bool>(this->width)
+	);
+
+	// Initialize
+	for (unsigned row = 0; row < this->height; row++) {
+        for (unsigned col = 0; col < this->width; col++) {
+        	// Accrual
+        	double accrual = 1.0;
+        	CellType type = cell(row,col).type;
+            if(type & (Person | PersonWithSmoke)) {
+                accrual *= occupied_distance;
+            }
+            if(type & (Smoke | PersonWithSmoke)) {
+                accrual *= smoke_distance;
+            }
+            accruals[row][col] = accrual;
+
+            // Distance
+            distances[row][col] = (double)UINT_MAX;
+
+            // Visited and pushed
+            visited[row][col] = false;
+            pushed[row][col] = false;
+        }
+    }
+
+    // Vector of unprocessed states
+    std::vector<CellPosition> unprocessed;
+    
+    // Push exit states
+    for(auto es: exit_states) {
+    	unprocessed.push_back(es);
+    	distances[es.first][es.second] = 0.0;
+    	pushed[es.first][es.second] = true;
+    }
+    
+    // Process all states
+    while(!unprocessed.empty()) {
+		// Find unprocessed state with minimum exit distance
+		CellPosition current = unprocessed[0];
+		int min = 0;
+		double current_distance = distances[current.first][current.second];
+		for(int i = 1; i < unprocessed.size(); i++) {
+			CellPosition cp = unprocessed[i];
+            double d = distances[cp.first][cp.second];
+            if(d < current_distance) {
+                min = i;
+                current = cp;
+                current_distance = d;
+			}
+		}
+
+		// Visit minimum
+        unprocessed[min] = unprocessed.back();
+		unprocessed.pop_back();
+		visited[current.first][current.second] = true;
+        
+        // Cell types that are considered reachable
+        constexpr int succTypes =  Empty | Exit | Person | Smoke
+           | PersonAppearance | PersonAtExit | PersonWithSmoke;
+
+        // Generate successors
+        std::vector<CellPosition> successors;
+        successors = cell_neighbourhood(current, succTypes);
+
+        // Compute successor distance
+        double accrual = accruals[current.first][current.second];
+        double next_distance = current_distance + accrual;
+
+        // Process all successors
+        for(CellPosition successor: successors) {
+            // Skip processed successors
+            unsigned r = successor.first, c = successor.second;
+            if(!visited[r][c]) {
+                if(next_distance < distances[r][c]) {
+                    distances[r][c] = next_distance;
+                    if(!pushed[r][c]) {
+                    	unprocessed.push_back(successor);
+                    	pushed[r][c] = true;
+                    }
+                }
+            }
+        }
+    }
+
+    // Store final result
+    for(unsigned row = 0; row < this->height; row++) {
+        for(unsigned col = 0; col < this->width; col++) {
+        	cell(row,col).exit_distance = distances[row][col];
+        }
+    }
+}
+/*
 void CA::recompute_shortest_paths()
 {{{
     // Reset exit distances
@@ -228,9 +340,27 @@ void CA::recompute_shortest_paths()
             min_distances[row][col] = (double)UINT_MAX;
         }
     }
+
+    // Compute distance accruals for the whole state space
+    std::vector<std::vector<double>> accruals(
+		this->height, std::vector<double>(this->width)
+	);
+	for (unsigned row = 0; row < this->height; row++) {
+        for (unsigned col = 0; col < this->width; col++) {
+        	double accrual = 1.0;
+        	CellType type = cell(row,col).type;
+            if(type & (Person | PersonWithSmoke)) {
+                accrual *= occupied_distance;
+            }
+            if(type & (Smoke | PersonWithSmoke)) {
+                accrual *= smoke_distance;
+            }
+            accruals[row][col] = accrual;
+        }
+    }
     
     // Apply Dijkstra for each exit state and keep minimum distances
-    for(auto es: exits) {
+    for(auto es: exit_states) {
     	// Initialize current distances
         std::vector<std::vector<double>> distances(
 			this->height, std::vector<double>(this->width)
@@ -277,7 +407,12 @@ void CA::recompute_shortest_paths()
 			unprocessed.pop_back();
 			visited[current.first][current.second] = true;
             
-            // Cell types that can be considered adjacent
+            // Skip if the distance is no better then current mininum
+            if(current_distance > min_distances[current.first][current.second]) {
+            	continue;
+            }
+
+            // Cell types that are considered reachable
             constexpr int succTypes =  Empty | Exit | Person | Smoke
                | PersonAppearance | PersonAtExit | PersonWithSmoke;
 
@@ -286,26 +421,20 @@ void CA::recompute_shortest_paths()
             successors = cell_neighbourhood(current, succTypes);
 
             // Compute successor distance
-            double accrual = 1.0;
-            if(cell(current).type & (Person | PersonWithSmoke)) {
-                accrual *= occupied_distance;
-            }
-            if(cell(current).type & (Smoke | PersonWithSmoke)) {
-                accrual *= smoke_distance;
-            }
+            double accrual = accruals[current.first][current.second];
             double next_distance = current_distance + accrual;
 
             // Process all successors
             for(CellPosition successor: successors) {
                 // Skip processed successors
-                int r = successor.first, c = successor.second;
+                unsigned r = successor.first, c = successor.second;
                 if(!visited[r][c]) {
                     visited[r][c] = true;
                     // Update distance
                     if(next_distance < distances[r][c]) {
                         distances[r][c] = next_distance;
+                        unprocessed.push_back(successor);
                     }
-                    unprocessed.push_back(successor);
                 }
             }
         }
@@ -327,6 +456,7 @@ void CA::recompute_shortest_paths()
         }
     }
 }}}
+*/
 
 CA CA::load(const std::string &filename)
 {{{
@@ -337,7 +467,7 @@ CA CA::load(const std::string &filename)
     for(unsigned row = 0; row < ca.height; row++) {
         for(unsigned col = 0; col < ca.width; col++) {
         	if(ca.cell(row, col).type == Exit) {
-                ca.exits.push_back(CellPosition(row,col));
+                ca.exit_states.push_back(CellPosition(row,col));
             }
         }
     }
@@ -352,7 +482,7 @@ CA CA::load(const std::string &filename)
 CA CA::copy() {
 	CA cpy = CA(height, width);
 	cpy.cells = cells;
-	cpy.exits = exits;
+	cpy.exit_states = exit_states;
 	cpy.stat = stat;
 	return cpy;
 }
