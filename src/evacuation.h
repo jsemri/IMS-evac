@@ -74,14 +74,14 @@ public:
 
 	Statistics() :
 		pedestrians{0}, time{0.0}, smoke_exposed{0.0},
-		moves{0.0}, evac_time{0.0}, runs{1}
+		moves{0.0}, evac_time{0.0}, runs{0}
     {}
 
     /** String representation of statistics. */
     std::string str() const noexcept;
 
     /** Aggregate statistics. */
-    void aggregate(Statistics *other);
+    void aggregate(Statistics &other);
 
     /** Normalize statistics for final output. */
     void normalize();
@@ -137,8 +137,8 @@ public:
     /// Store model description to "output.bmp".
     void show();
 
-    /// Display simulation statistics.
-    void print_statistics() const noexcept;
+    /// Copy the CA.
+    CA copy();
 
     // Inline methods:
 

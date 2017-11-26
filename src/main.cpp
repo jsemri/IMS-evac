@@ -13,14 +13,6 @@
 #include "evacuation.h"
 #include "bitmap.h"    // remove after debug
 
-/**
- * Simulate once and deliver statistics.
- * TODO
- */
-static Evacuation::Statistics simulate(
-    char *filename, int delay, int people, int smoke
-);
-
 /** --help string. */
 static const char *helpstr =
 "Program for simulating evacuation of building.\n"
@@ -66,57 +58,64 @@ int main(int argc, char **argv) {
     }
     char *filename = argv[opt_cnt];
 
-    // Simulate once and display statistics
-    Evacuation::Statistics stat = simulate(filename, delay, people, smoke);
-    std::cout << stat.str();
-
-    // Success
-    return EXIT_SUCCESS;
-}
-
-// Definitions
-
-static Evacuation::Statistics simulate(
-    char *filename, int delay, int people, int smoke
-) {
+    // Load the model
     try {
         // Seed
         std::srand(std::time(0));
         
         // Load model from a bitmap
-        Evacuation::CA ca = Evacuation::CA::load(filename);
+        Evacuation::CA model = Evacuation::CA::load(filename);
     
         // Populate the model and add smoke
-        ca.add_people(people);
-        ca.add_smoke(smoke);
-
-        // Display exit distances
-        //Bitmap::display_distances(ca);
+        model.add_people(people);
+        model.add_smoke(smoke);
         
         // Uncoment this to open image with xdg-open
         if (delay > 0) {
-            //std::system("xdg-open output.bmp");
+            // Display exit distances
+            Bitmap::display_distances(model);
+
+            // Display the model
+            model.show();
+
+            std::system("xdg-open output.bmp");
+        }        
+
+        // Simulate n times and display aggregate statistics
+        Evacuation::Statistics stat;
+        stat.pedestrians = people;
+        for(int i = 0; i < 2; i++) {
+            // Copy the CA
+            Evacuation::CA ca = model.copy();
+
+            // Evolve CA in loop until CA can't change its states
+            while (ca.evolve()) {
+                if (delay > 0) {
+                    // Show the current state of CA
+                    ca.show();
+                    usleep(delay);
+                }
+            }
+
+            // Show the final state of CA
+            ca.show();  // comment this for statistic collecting
+
+            // Collect statistics
+            std::cout << ca.stat.str();
+            stat.aggregate(ca.stat);
+            stat.runs++;
         }
 
-        // Show initial state for a few seconds
-        ca.show();
-        sleep(2);
-        
-        // Evolve CA in loop until CA can't change its states
-        while (ca.evolve()) {
-            // Show the current state of CA
-            if (delay > 0) {
-                ca.show();
-                usleep(delay);
-            }
-        }
-        
-        // Show the final state of CA and collect statistics
-        ca.show();
-        return ca.stat;
+        // Normalize and display statistics
+        stat.normalize();
+        std::cout << stat.str();
     }
     catch (std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    // Success
+    return EXIT_SUCCESS;
 }
+

@@ -349,14 +349,17 @@ CA CA::load(const std::string &filename)
     return ca;
 }}}
 
+CA CA::copy() {
+	CA cpy = CA(height, width);
+	cpy.cells = cells;
+	cpy.exits = exits;
+	cpy.stat = stat;
+	return cpy;
+}
+
 void CA::show()
 {{{
     Bitmap::store(*this, "output.bmp");
-}}}
-
-void CA::print_statistics() const noexcept
-{{{
-	std::cout << stat.str();
 }}}
 
 
@@ -365,7 +368,7 @@ std::string Statistics::str() const noexcept
 	std::ostringstream ss;
     // TODO exits - number, size, loading
     ss << "*********************************************************\n";
-    float traveled = moves * cell_width;
+    float travelled = moves * cell_width;
     float realtime = time * time_step;
     ss << "Total pedestrians                 : " << pedestrians
         << std::endl;
@@ -376,21 +379,20 @@ std::string Statistics::str() const noexcept
         << smoke_exposed * time_step / pedestrians << " s" << std::endl;
     ss << "Mean evacuation time per person   : "
         << evac_time * time_step / pedestrians << " s" << std::endl;
-    ss << "Total distance traveled           : " << traveled << " m"
+    ss << "Total distance travelled           : " << travelled << " m"
         << std::endl;
-    ss << "Mean distance traveled per person : "
-        << traveled / pedestrians << " m" << std::endl;
+    ss << "Mean distance travelled per person : "
+        << travelled / pedestrians << " m" << std::endl;
     ss << "*********************************************************\n";
 
     return ss.str();
 }}}
 
-void Statistics::aggregate(Statistics *other) {
-	time += other->time;
-	smoke_exposed += other->smoke_exposed;
-	moves += other->moves;
-	evac_time += other->evac_time;
-	runs += other->runs;
+void Statistics::aggregate(Statistics &other) {
+	time += other.time;
+	smoke_exposed += other.smoke_exposed;
+	moves += other.moves;
+	evac_time += other.evac_time;
 }
 
 void Statistics::normalize() {
