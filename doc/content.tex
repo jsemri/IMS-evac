@@ -1,11 +1,174 @@
 \section{Introduction}
-% XXX use this citation
-some content~\cite{CaEvac}
+Education buildings are common examples of commercial buildings that involve a
+meeting of a large number of people withing a closed area.
+While designing such types of buildings, a common goal is to maximize the
+productivity of the available space, but it is essential to consider the
+safety aspects as well.
+One of such aspects is how efficiently can emergency evacuations be carried out
+due to the threat of fire.
+Whether a building layout is suitable for emergency evacuation is a difficult
+and somewhat ambiguous decision due to the fact that numerous factors must be
+taken into account, such as fire and smoke spreading, behaviour of every single
+individual as well as crowd dynamics and other random events.
+Modelling these situations can give an insight into the safety aspects of a
+building and identify its flaws.
 
-\section{Problem Description}
-% XXX
+This project addresses a question of how such evacuation processes can be
+modelled using cellular automata [ims-315].
+Our work is mainly based on a research by Tissera et al.~\cite{Tissera1};
+several modifications enhancing pedestrian behaviour are introduced, some of
+them inspired by the research by Yuan et al.~\cite{Yuan}.
+We will use our approach to model evacuation processes inside two selected
+buildings, namely, D and E wings of FIT BUT building~\cite{FIT}.
+Using these models we will simulate different fire scenarios and collect
+various statistics in order to evaluate key safety aspects of the
+systems [ims-7] under investigation.
+
+{TODO Validation TODO}
+
+Section 2 describes some basic concepts: a theory behind cellular automata,
+the laws of fire and smoke spreading and the principles behind people movement.
+Also, in order to evaluate a level of emergency safety of the buildings of
+interest, we will try to measure an impact of the fire on each individual
+inside, which is an interest of subsecion 2.4.
+In Section 3 we invoke these concepts and introduce an abstract model [ims-9]
+of a system.
+
+{In Section 4 TODO}
+
+{In Section 5 TODO}
+
+\section{Preliminaries}
+\subsection{Cellular Automata}
+Let us first briefly describe a mathematical apparatus in the core of our
+models, namely, cellular automata (CA)~\cite{Wolfram}.
+The CA are mathematical systems with discrete values in space, time and
+state.
+With respect to the structure a CA can be considered as a grid of locally
+interconnected cells that behave like finite automata.
+The input of each finite automaton (cell) is considered to be a state of the
+neighbouring cells.
+During each discrete step, a cell evaluates its input and produces an
+output, modifying its own state.
+Therefore, the state of a cell of a cellular automaton in a particular time
+step only depends of the states of its neighbouring cells and the state the
+cell had in the previous time step.
+
+The spatial framework of the CA can be specified in any number of dimensions
+where cells might be of any regular shape.
+Similarly, the neighbourhood of the cell can be defined in various ways.
+Having established the structure of the automaton and the shape of the
+neighbourhood one needs to define the set of states of a cell and the rules
+that dictate transitions between the states.
+In our case, we need to study the laws of fire/smoke spreading and people
+motion, which is the main interest of the following subsections.
+
+\subsection{Fire and smoke spreading}
+The phenomenon of fire and smoke spreading is extremely complex due to the
+involvement of numerous non-trivial chemical reactions and physical processes
+~\cite{Ying}~\cite{Curiac}.
+Simulating such processes using means of CA usually involves two interconnected
+automata: one for fire spreading simulation and one for smoke spreading
+simulation~\cite{Curiac}.
+The first one employs two factors: combustion materials that are placed in the
+two adjacent cells under investigation and information about airflow velocities.
+Capturing data to quantify the latter factor is not a trivial task and is
+usually performed by establishing a sensor network to measure these velocities
+real-time.
+This is impossible for buildings that are being planned, so, again, simulations
+of the airflow are used, which is a non-trivial procedure on its
+own~\cite{Airflow}.
+Therefore, this complex process is very often~\cite{Tissera1}~\cite{Tissera2}
+approximated by considering only flammability/combustibility of materials.
+The model is then reduced to a simple diffusion process where a probability of
+cell contamination at the current time is proportional to the contamination
+level of its neighbourhood.
+
+The CA for smoke spreading simulation are quite similar to those developed for
+fire spreading with some adjustment of parameters~\cite{Curiac}.
+The reason for this is that propagation speed of a smoke is usually much higher
+than the one related to fire and therefore the smoke automaton evolves much
+quicker than the fire automaton.
+Regarding this, our preliminary prototypes showed that for buildings of
+interest fire automaton remains almost stationary and, apart from generating
+toxic smoke, does not influence the model whatsoever.
+The reason for this lies in the fact that investigated buildings are relatively
+small (area of E wing is approximately 900 m$^2$), and evacuation proceeds too
+fast for the fire to spread (ignoring the case when the whole complex
+completely randomly and instantaniously catches fire).
+
+Does this imply that such buildings are safe?
+Not at all, one should not neglect the speed with which smoke propagates.
+This speed, again, largely depends on the spatial configuration of a building
+and generated airflows.
+For the exact same reasons as those mentioned before, smoke spreading is often
+approximated by a simple diffusion model where each contaminated cell also
+serves as a source of a smoke~\cite{Tissera1}~\cite{Tissera2}.
+Quantitatively, the propagation speed varies between 0.2 - 1.2 m/s~\cite{Smoke}.
+We will stick to the smaller values to account for relatively high ceilings in
+both E and D wings.
+
+Also, note that in the initial phases of smoke spreading, the smoke tends to go
+up driven by the buoyant forces, meaining that in the beginning no diffusion
+in horizontal direction occurs~\cite{Curiac}.
+In our model, this delay is compensated by two factors: i) fire alarm is not
+triggered until the smoke reaches the ceiling and ii) it takes a distinguishable
+amount of time for the individuals inside the building to evaluate a
+seriousness of a fire in order to initiate extraction.
+
+\subsection{People motion}
+Crowd behaviour that arises from the behaviour of every single individual is
+arguably even more complex than the process of smoke spreading due to the fact
+that the former assumes numerours psychological factors as well~\cite{Ying}.
+A model by Tissara et al.~\cite{Tissera1} completely ignores such factors and a
+behaviour of an individual is defined by his spatial distance: an individual
+will proceed to the nearest exit no matter what.
+A model by Yuan et al.~\cite{Yuan} also considers occupant density in a sense
+that an individual might trade the nearest exit for the other one if the latter
+is less crowded and therefore a person has more chances for a safe extraction.
+Yuan's extended model also accounts for some characteristics of humans,
+such as unadventurous effect (a person will try to exit through the same route
+he entered a building because occupants generally do not want to use a new exit
+they have no experience with), inertial effect (once a person moves towards a
+certain exit, he is unlikely to change his direction) or group effect(group
+members will help one another in emergency).
+An improved model by Tissara et al.~\cite{Tissera2} manages to account for human
+factors by employing intelligent agents~\cite{AI} where each agent possesses
+certain psychological, psysiological and social characteristics that shape his
+behaviour based on perceived (limited) information.
+
+In our work we will stick to the Yuan's basic approach (an individual chooses
+the nearest exit but might switch to the one that is less crowded) with one
+slight modification: an individual is also not ignorant of the danger
+of smoke poisoning and will prefer a clear path towards exit (choosing the
+cells without the smoke) and might even change its destination exit when the
+closest one is too toxic.
+This description might sound vague, but we will formally define such behaviour
+in the next section while introducing the abstract model.
+
+\subsection{Effects of smoke inhalation}
+Since we are not considering a spreading of fire inside a building and consider
+only smoke, we must be aware of its impact. Smoke inhalation injury, either by
+itself or in the presence of a burn, is now well-recognized~\cite{NCBI} to
+result in severe lung-induced morbidity and mortality.
+Severeness of the intoxication depends on the components of the smoke,
+concentration and a temperature of combustion, but the critical parameter is
+the time of the smoke exposure.
+For carbon monoxide (the most common smoke component) of moderate concentration
+($\geq$ 5000 ppm) 20 minutes of exposure is estimated to be enough to incapacite
+an adult~\cite{CO1}, 5 minutes is estimated to be a threshold when
+the smoke poisoning leads to permanent effects~\cite{NCBI}~\cite{CO2}.
+Impact can be even more severe if a person under exposure already possesses
+cardiovascular or respiratory conditions~\cite{Inhalation}.
+
+It is hard to predict the nature of the smoke in our modelled buildings as well
+its concentration, so we will stick to the estimations of the average case
+above and use a reference value of 5 minutes of smoke exposure to evaluate
+whether an extraction can be considered successful.
 
 \section{Modeling}
+%We will consider a finite two-dimensional grid of square cells, we will stick to the Moore-shape~\cite{Moore} neighbourhood (eight surrounging cells), which is a common choice when one wants to allow a cell to act along all possible directions.
+
 In this section we describe our model based on CA (Cellular Automata). We
 assume that the reader is familiar with the basic concepts of CA.
 
