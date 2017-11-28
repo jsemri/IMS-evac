@@ -7,7 +7,7 @@ safety aspects as well.
 One of such aspects is how efficiently can emergency evacuations be carried out
 due to the threat of fire.
 Whether a building layout is suitable for emergency evacuation is a difficult
-and somewhat ambiguous decision due to the fact that numerous factors must be
+and rather ambiguous decision due to the fact that numerous factors must be
 taken into account, such as fire and smoke spreading, behaviour of every single
 individual as well as crowd dynamics and other random events.
 Modelling these situations can give an insight into the safety aspects of a
@@ -27,10 +27,7 @@ systems [ims-7] under investigation.
 {TODO Validation TODO}
 
 Section 2 describes some basic concepts: a theory behind cellular automata,
-the laws of fire and smoke spreading and the principles behind people movement.
-Also, in order to evaluate a level of emergency safety of the buildings of
-interest, we will try to measure an impact of the fire on each individual
-inside, which is an interest of subsecion 2.4.
+the laws of fire and smoke spreading, the principles behind people movement and consequences of smoke poisoning.
 In Section 3 we invoke these concepts and introduce an abstract model [ims-9]
 of a system.
 
@@ -51,7 +48,7 @@ neighbouring cells.
 During each discrete step, a cell evaluates its input and produces an
 output, modifying its own state.
 Therefore, the state of a cell of a cellular automaton in a particular time
-step only depends of the states of its neighbouring cells and the state the
+step only depends on the states of its neighbouring cells and the state the
 cell had in the previous time step.
 
 The spatial framework of the CA can be specified in any number of dimensions
@@ -59,14 +56,14 @@ where cells might be of any regular shape.
 Similarly, the neighbourhood of the cell can be defined in various ways.
 Having established the structure of the automaton and the shape of the
 neighbourhood one needs to define the set of states of a cell and the rules
-that dictate transitions between the states.
-In our case, we need to study the laws of fire/smoke spreading and people
+that dictate transitions between these states.
+In our case, we need to study the laws of fire/smoke propagation and people
 motion, which is the main interest of the following subsections.
 
-\subsection{Fire and smoke spreading}
+\subsection{Fire and Smoke Spreading}
 The phenomenon of fire and smoke spreading is extremely complex due to the
 involvement of numerous non-trivial chemical reactions and physical processes
-~\cite{Ying}~\cite{Curiac}.
+~\cite{Ying, Curiac}.
 Simulating such processes using means of CA usually involves two interconnected
 automata: one for fire spreading simulation and one for smoke spreading
 simulation~\cite{Curiac}.
@@ -78,7 +75,7 @@ real-time.
 This is impossible for buildings that are being planned, so, again, simulations
 of the airflow are used, which is a non-trivial procedure on its
 own~\cite{Airflow}.
-Therefore, this complex process is very often~\cite{Tissera1}~\cite{Tissera2}
+Therefore, this complex process is very often~\cite{Tissera1, Tissera2}
 approximated by considering only flammability/combustibility of materials.
 The model is then reduced to a simple diffusion process where a probability of
 cell contamination at the current time is proportional to the contamination
@@ -86,7 +83,7 @@ level of its neighbourhood.
 
 The CA for smoke spreading simulation are quite similar to those developed for
 fire spreading with some adjustment of parameters~\cite{Curiac}.
-The reason for this is that propagation speed of a smoke is usually much higher
+The reason for this is that propagation speed of a smoke is typically much higher
 than the one related to fire and therefore the smoke automaton evolves much
 quicker than the fire automaton.
 Regarding this, our preliminary prototypes showed that for buildings of
@@ -94,8 +91,11 @@ interest fire automaton remains almost stationary and, apart from generating
 toxic smoke, does not influence the model whatsoever.
 The reason for this lies in the fact that investigated buildings are relatively
 small (area of E wing is approximately 900 m$^2$), and evacuation proceeds too
-fast for the fire to spread (ignoring the case when the whole complex
-completely randomly and instantaniously catches fire).
+fast for the fire to spread; similar behaviour can be inspected in analogous
+experiments~\cite{Tissera1}.
+Exception would be the case when large areas of a building instantaniously catch
+fire, although this requires a a presense of a significant amount of flammable 
+material (e.g. library)~\cite{Tissera2}.
 
 Does this imply that such buildings are safe?
 Not at all, one should not neglect the speed with which smoke propagates.
@@ -103,24 +103,24 @@ This speed, again, largely depends on the spatial configuration of a building
 and generated airflows.
 For the exact same reasons as those mentioned before, smoke spreading is often
 approximated by a simple diffusion model where each contaminated cell also
-serves as a source of a smoke~\cite{Tissera1}~\cite{Tissera2}.
+serves as a source of a smoke~\cite{Tissera1, Tissera2}.
 Quantitatively, the propagation speed varies between 0.2 - 1.2 m/s~\cite{Smoke}.
-We will stick to the smaller values to account for relatively high ceilings in
+We will stick with the smaller values to account for relatively high ceilings in
 both E and D wings.
 
 Also, note that in the initial phases of smoke spreading, the smoke tends to go
-up driven by the buoyant forces, meaining that in the beginning no diffusion
+up driven by the buoyant forces, meaning that in the beginning no diffusion
 in horizontal direction occurs~\cite{Curiac}.
 In our model, this delay is compensated by two factors: i) fire alarm is not
 triggered until the smoke reaches the ceiling and ii) it takes a distinguishable
 amount of time for the individuals inside the building to evaluate a
 seriousness of a fire in order to initiate extraction.
 
-\subsection{People motion}
+\subsection{People Motion}
 Crowd behaviour that arises from the behaviour of every single individual is
 arguably even more complex than the process of smoke spreading due to the fact
 that the former assumes numerours psychological factors as well~\cite{Ying}.
-A model by Tissara et al.~\cite{Tissera1} completely ignores such factors and a
+A model by Tissera et al.~\cite{Tissera1} completely ignores such factors and a
 behaviour of an individual is defined by his spatial distance: an individual
 will proceed to the nearest exit no matter what.
 A model by Yuan et al.~\cite{Yuan} also considers occupant density in a sense
@@ -128,16 +128,15 @@ that an individual might trade the nearest exit for the other one if the latter
 is less crowded and therefore a person has more chances for a safe extraction.
 Yuan's extended model also accounts for some characteristics of humans,
 such as unadventurous effect (a person will try to exit through the same route
-he entered a building because occupants generally do not want to use a new exit
-they have no experience with), inertial effect (once a person moves towards a
-certain exit, he is unlikely to change his direction) or group effect(group
-members will help one another in emergency).
-An improved model by Tissara et al.~\cite{Tissera2} manages to account for human
+he entered), inertial effect (once a person moves towards a
+certain exit, he is less likely to change his direction) or group effect
+(group members will help one another in emergency).
+An improved model by Tissera et al.~\cite{Tissera2} manages to account for human
 factors by employing intelligent agents~\cite{AI} where each agent possesses
-certain psychological, psysiological and social characteristics that shape his
+certain psychological, physiological and social characteristics that shape his
 behaviour based on perceived (limited) information.
 
-In our work we will stick to the Yuan's basic approach (an individual chooses
+In our work we will stick with the Yuan's basic approach (an individual chooses
 the nearest exit but might switch to the one that is less crowded) with one
 slight modification: an individual is also not ignorant of the danger
 of smoke poisoning and will prefer a clear path towards exit (choosing the
@@ -146,7 +145,7 @@ closest one is too toxic.
 This description might sound vague, but we will formally define such behaviour
 in the next section while introducing the abstract model.
 
-\subsection{Effects of smoke inhalation}
+\subsection{Effects of Smoke Inhalation}
 Since we are not considering a spreading of fire inside a building and consider
 only smoke, we must be aware of its impact. Smoke inhalation injury, either by
 itself or in the presence of a burn, is now well-recognized~\cite{NCBI} to
@@ -157,28 +156,32 @@ the time of the smoke exposure.
 For carbon monoxide (the most common smoke component) of moderate concentration
 ($\geq$ 5000 ppm) 20 minutes of exposure is estimated to be enough to incapacite
 an adult~\cite{CO1}, 5 minutes is estimated to be a threshold when
-the smoke poisoning leads to permanent effects~\cite{NCBI}~\cite{CO2}.
+the smoke poisoning leads to permanent effects~\cite{NCBI, CO2}.
 Impact can be even more severe if a person under exposure already possesses
 cardiovascular or respiratory conditions~\cite{Inhalation}.
 
 It is hard to predict the nature of the smoke in our modelled buildings as well
-its concentration, so we will stick to the estimations of the average case
-above and use a reference value of 5 minutes of smoke exposure to evaluate
+its concentration, so we will stick with the estimations of the average case
+above and use a reference value of 5 minutes of smoke exposure to decide
 whether an extraction can be considered successful.
 
-\section{Modeling}
-%We will consider a finite two-dimensional grid of square cells, we will stick to the Moore-shape~\cite{Moore} neighbourhood (eight surrounging cells), which is a common choice when one wants to allow a cell to act along all possible directions.
+\section{Model Description}
+Let us first describe a simplified version of a model to familiarize the reader with 
+the basic rules; later we will introduce one advanced property that completes the 
+model.
+We consider a finite two-dimensional grid of square cells with closed boundaries; 
+each cell represents a $0.4 \times 0.4$ meters square, which is considered to be the 
+space occupied by a person in a crowd with maximal
+density~\cite{Density1, Density2}.
+We use \emph{Moore Neighbourhood}~\cite{Moore}, which is a common choice when one 
+wants to allow a cell to act along all possible directions.
+A discrete time step represents 0.3 seconds of real time, which is estimated to be 
+the time required for a pedestrian to move 0.4 meters
+(size of a cell side)~\cite{Density1}.
 
-In this section we describe our model based on CA (Cellular Automata). We
-assume that the reader is familiar with the basic concepts of CA.
-
-\subsection{Cells}
-We work with two-dimensional space, where each cell represents a $0.4 \times
-0.4$ meters square. In our model we use \emph{Moore
-Neighbourhood}~\cite{Moore}, where eight cells surround a given cell.
-The set of possible states $Q$ which each cell can get is following
-$$Q = \{W,O,P,S,E,EX,PIA,PIS,OIS,PAE\}$$ where the meaning of symbols
-is
+\subsection{Cell States}
+The set of all possible cell states $Q$ is the following
+$$Q = \{W,O,P,S,E,EX,PS,OS,PE\}$$ where:
 \begin{itemize}
     \item W\,--\,Wall
     \item O\,--\,Obstacle
@@ -186,79 +189,129 @@ is
     \item S\,--\,Smoke
     \item E\,--\,Empty cell
     \item EX\,--\,Exit
-    \item PIA\,--\,Person Initial Appearance
-    \item PIS\,--\,Person In Smoke
-    \item OIS\,--\,Obstacle In Smoke
-    \item PAE\,--\,Person At the Exit
+    \item PS\,--\,Person with Smoke
+    \item OS\,--\,Obstacle with Smoke
+    \item PE\,--\,Person at the Exit
 \end{itemize}
 
-\subsection{Initial Configuration}
-The initial configuration of walls, obstacles and exits is defined by input
-pixmap. The correctness  of the input is not verified, it is left on a user.
-The initial location of people and smoke is solved by program and it is
-described in next sections.
-\subsubsection{People}
-The location of the people at the beginning of the simulation is by randomly
-distribution over empty cells. Cells with state $E$ and $PIA$ are considered as
-initial places where people can appear. However, $PIA$ cells are occupied with
-higher priority. Actually this is the only difference between these cell types.
-\subsubsection{Smoke}
-The initial location of smoke is also randomly distributed over empty cells.
-However, here the priority does not have any effect.
+A \emph{Wall} cell represents an external or internal wall that cannot be occupied 
+by a person or be penetrated by smoke; \emph{Obstacle} cells (tables, vending 
+machines etc.) also serve as a barrier for individuals, but do not stop the smoke 
+spreading (hence $OS$ exists as well).
+Other state names are self-explanatory.
 
+There is one more cell state, $PI$ (Person Initial position) which is used during 
+the initialization of the CA and is not involved in its evolution.
+For now we assume that a specific initial configuration is given and in the next 
+section we will describe how such configuration is loaded into the program.
+
+Each cell also carries one value, $sd$ (\emph{spatial distance}), that represents a 
+distance (in cell hops) to the nearest exit.
 
 \subsection{Evolution Rules}
 \begin{enumerate}
-    \item Cells with type $W$ does not change throughout the whole simulation.
-    \item Smoke can be propagated to the following cells: $O, P, E$ and $PIA$.
-    Cells which can propagate smoke are $S,PIA$ and $PIS$. The cell without
-    smoke can be affected with smoke with probability proportional to the
-    number of smoked cells surrounding the given cell. This is defined by
-    following equation $\frac{N}{8} \cdot C_{SS}$, where $N$ is the number of
-    neighbouring cells affected with smoke and $C_{SS}$ is smoke spreading
-    coefficient. Since the ceiling of our modeled buildings is quite high and
-    we assume that people do not leave building immediately when fire
-    starts, our empirical choice of of the coefficient $C_{SS}$ is 0.25.
-    When a cell is being affected with the smoke its state is changed with
-    respect to the following rules:
-    \begin{itemize}
-        \item $E \rightarrow S$, an empty cell becomes smoke cell
-        \item $PIA \rightarrow S$, a person appearance cell becomes a smoke cell
-        \item $O \rightarrow OS$, an obstacle becomes an obstacle with smoke
-        \item $P \rightarrow PIS$, a person becomes a person in smoke
-    \end{itemize}
-    \item The people, cells $P$ and $PIS$, can move to any empty cell in their
-    \emph{Moore Neighbourhood}. The allowed empty cells are $E,PIA,S$ and $EX$.
-    If a person reaches an exit, person leaves a system in the next evolution
-    step. When person moves into specific cell, it changes its state with
-    respect to the following rules.
-    \begin{itemize}
-        \item $E \rightarrow P$, a person moves into an empty cell
-        \item $PIA \rightarrow P$, a person moves into an appearance cell
-        \item $S \rightarrow PIS$, a person moves into a smoke and is affected
-        by smoke
-        \item $EX \rightarrow PAE$, a person moves into an exit, and is
-        ready to leave a system, in the next evolution step this cell becomes
-        exit again, so it can be occupied by another person
-    \end{itemize}
-    The person's previous position is recovered by its former cell type. The
-    way how the pedestrians moves and behaves is described in the next section.
+    \item Wall cell preserves its state throughout the whole simulation.
+
+    \item A cell with smoke ($S$, $PS$ or $OS$) at time $t$ will also have smoke at 
+    time $t+1$. If at time $t$ a certain cell does not have a smoke (states $E$, $P$ 
+    or $O$), but some of its adjacent cells have smoke, with a certain probability 
+    such cell will have smoke at time $t+1$ ($E$ will become $S$, $P$ will become
+    $PS$, $O$ will become $OS$). This probability is proportional to the number of 
+    cells with smoke in the neighbourhood; the exact value is computed using an 
+    expression $C_{SS} \cdot \frac{N}{8}$, where $N$ is the number of adjacent cells 
+    affected by smoke and $C_{SS}$ is smoke spreading coefficient. A smoke 
+    propagation speed of $0.2-1.2$m/s translates to $0.15-0.9$ cells per step; 
+    using assumptions stated in the previous section, we choose a value of 
+    normalizing coefficient $C_{SS}$ to be 0.25. 
+    
+    \item In one discrete step a person (states $P$ and $PS$) can any move to any 
+    cell in his neighbourhood, provided that i) the target cell is unoccupied (
+    states $E$, $S$ and $EX$) and ii) the distance to the exit $sd$ of the target 
+    cell is less than or equal to the one that is currently occupied. When a person 
+    reaches an exit (state $EX \rightarrow PE$), he remains there until the end of 
+    the discrete step (simulating the blocking of an exit) and is collected at the 
+    beginning of the next step, freeing the exit. Other aspects related to the 
+    people motion are described in the next subsection.
 \end{enumerate}
 
-\subsection{Pedestrians Motion}
-Person movement is based on picking the smallest distance to the exit. However,
-to avoid unrealistic motion we try to refine it with some extended features.
+\subsection{People Motion}
+In order to drive the movement of each individual we need to compute for each cell 
+that can be occupied (neither walls nor obstacles) its spatial distance $sd$ to the closest exit.
+We consider the cellular space as a graph, where each cell represents a node and all 
+the edges connecting adjacent cells have weight one.
+Having multiple exits, a modified version of the Dijkstra's shortest path algorithm 
+is applied where the edges are reversed and exits (destinations) are treated as 
+sources (multiple source to single destination, MSSD)~\cite{Dijkstra}.
 
-\subsubsection{Computing the Distances}
-% XXX dijsktra, recomputing, etc.
+As was mentioned before, a person will try to move closer to the exit by selecting 
+those adjacent cells that have an $sd$ value less than the one that is currently 
+occupied.
+In case when there is more than one such cell, a cell is selected at random.
+To avoid collisions (when two or more individuals aim to occupy the same cell during 
+transition) we perform update of person cells sequentially.
+The order of update is random and is different during every step in order to avoid 
+any bias.
 
-\subsubsection{Collisions}
-In case a person cannot move to the cell nearer to exit (mostly because of
-another person), the person can move to the cell with same exit distance with
-some probability. This probability is denoted as \emph{chaos}. It was defined
-because of the fact that a person in reality does not immediately know the real
-exit distance. This also simulates by-passing of blocking people and not
-creating unrealistic queues before exits.
+In case a person cannot move to the cell nearer to exit (because it is being 
+occupied by another person), with certain probability he can move to the cell with 
+the same spatial distance.
+This probability is denoted as \emph{chaosTODO} and has a value of TODO.
+This approach solves an issue addressed by Tissera et al.~\cite{Tissera1} when 
+blocked individuals were standing still which sometimes leads to unrealistic 
+behaviour.
+This probabilistic shift can also simulate by-passing (on a local scope) of blockers 
+ahead.
+
+Finally, we have to answer a question how to enhance the abilities of individuals to 
+evaluate current situation so that they are able to recognize bad routes and bad 
+exits, either overcrowded or filled with smoke.
+This is achieved by introducing a notion of perceived distances.
+
+\subsection{Perceived Distances}
+In order to explain the idea behind perceived distances we will first modify our 
+existing model and then justify these changes when the goal becomes more apparent. 
+First, we change $sd$ property of a cell to $pd$, which stands for \emph{perceived 
+distance}.
+Next, for MSSD path evaluation we use the following modifications:
+
+\begin{itemize}
+    \item a distance from any cell to the cell that is occupied by an individual (state $P$) is $C_{op}$
+    \item a distance from any cell to the cell that is filled with smoke (state $S$) is $C_{sp}$
+    \item a distance from any cell to the cell that is both occupied by an individual and filled with smoke (state $PS$) is $C_{op} \cdot C_{sp}$
+    \item all other edges have weight $1$ (as before)
+\end{itemize}
+for $C_{op} \geq 1, C_{sp} \geq 1$.
+A person then selects a cell which has a minimum value of $pd$.
+
+In other words, when a target cell is occupied or filled with smoke, it is \emph{
+perceived} as being further from the current one.
+Using these modifiers for a solution of MSSD problem allows for the heavily 
+overcrowded routes to magnify their $pd$ property.
+Since the configuration of automaton is not stationary and the weights of the edges 
+dynamically change, perceived distances must be recomputed in the beginning of each 
+step.
+As a consequence of this, a person is now able (in each step) to evaluate the 
+current situation, identify overcrowded or intoxicated areas and try to avoid them. 
+Please note that the presence of smoke or a person several steps ahead will not slow 
+down an individual: the spatial distance between two adjacent cells is still 0.4 
+meters and it still takes 0.3 seconds to cover this distance.
+What changes is the \emph{perception} (hence the name) of the surrounding area that
+influences a behavior of an individual.
+
+We still have to assign concrete values to parameters $C_{op}$ and $C_{sp}$.
+Note that for $C_{op} = C_{sp} = 1$ the perceived distance is reduced to the spatial 
+distance and individuals act solely upon information about nearest exits. 
+Unfortunately, we failed to find any statistical data about a human perception of 
+the crowds or the smoke that would suggest the choice of the parameters, neither 
+could we derive them based upon real life experiments, for obvious reasons. 
+Empirical value of 5.0 for $C_{sp}$ was selected based on experiments with the 
+model; such value leads to behaviour when a person would trade an exit at a
+(spatial) distance 4.0 in favor of the exit at the distance 5.0 in order to avoid 
+the smoke; conversely, a person is not afraid to cross 0.4 meters of smoked area 
+towards exit when the next closest one is ten meters away.
+The exact same argument applies to $C_{op}$ for which a value of 2.0 was chosen.
+Yuan's model ~\cite{Yuan} also quantifies this perception by means of a set
+of parameters.
 
 \section{Implementation}
 We divide the handling of input and output from application logic. The
@@ -290,7 +343,22 @@ while (ca.evolve() == true)      // evolve until all people are evacuated
 }
 \end{lstlisting}
 
-\subsection{Image Processing}
+\subsection{Initial Configuration}
+The initial configuration of walls, obstacles and exits is defined by input
+pixmap. The correctness  of the input is not verified, it is left on a user.
+The initial location of people and smoke is solved by program and it is
+described in next sections.
+
+\subsubsection{People}
+The location of the people at the beginning of the simulation is by randomly
+distribution over empty cells. Cells with state $E$ and $PI$ are considered as
+initial places where people can appear. However, $PI$ cells are occupied with
+higher priority. Actually this is the only difference between these cell types.
+
+\subsubsection{Smoke}
+The initial location of smoke is also randomly distributed over empty cells.
+However, here the priority does not have any effect.
+
 % XXX
 
 \section{Experiments}
