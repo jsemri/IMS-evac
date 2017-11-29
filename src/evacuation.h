@@ -71,10 +71,12 @@ public:
     double evac_time;
     /** Number of simulations. */
     int runs;
+    /** Max person smoke expose*/
+    double max_smoke_exposed;
 
 	Statistics() :
 		pedestrians{0}, time{0.0}, smoke_exposed{0.0},
-		moves{0.0}, evac_time{0.0}, runs{0}
+		moves{0.0}, evac_time{0.0}, runs{0}, max_smoke_exposed{0.0}
     {}
 
     /** String representation of statistics. */
@@ -93,9 +95,11 @@ struct Cell {
     CellType type;
     /** Distance (in pseudo-hops) to nearest exit. */
     unsigned exit_distance;
+    /** Person's data */
+    int smoke_exposed;
 
     Cell() :
-        type{Empty}, exit_distance{UINT_MAX}
+        type{Empty}, exit_distance{UINT_MAX}, smoke_exposed{0}
     {}
 };
 

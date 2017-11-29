@@ -63,6 +63,7 @@ bool CA::evolve()
     stat.time += 1;
 
     std::vector<CellPosition> people;
+    std::vector<CellPosition> smoke_cells;
     for (size_t row = 0; row < this->height; row++) {
         for (size_t col = 0; col < this->width; col++) {
             auto &current = cells[row][col];
@@ -73,9 +74,14 @@ bool CA::evolve()
                 case Person:
                 {
                     // propagation of smoke
-                    int smoke_neigh =
+                    float smoke_neigh =
                         cell_neighbourhood(row, col, SmokeCells).size();
-                    if (PROB( smoke_neigh/ 8.0 * smoke_spreading_rate)) {
+
+                    float neigh =
+                        cell_neighbourhood(row, col, ~(Exit | Wall)).size();
+                    if (PROB( smoke_neigh/ neigh * smoke_spreading_rate)) {
+                        smoke_cells.push_back(CellPosition(row, col));
+                        /*
                         if (current.type == Obstacle) {
                             current.type = ObstacleWithSmoke;
                         }
@@ -85,7 +91,7 @@ bool CA::evolve()
                         }
                         else {
                             current.type = Smoke;
-                        }
+                        }*/
                     }
                     if (current.type == Person) {
                         // remember person position
@@ -96,11 +102,15 @@ bool CA::evolve()
                 case PersonAtExit:
                     // remove people at exits
                     stat.evac_time += stat.time;
+                    if (stat.max_smoke_exposed < current.smoke_exposed) {
+                        stat.max_smoke_exposed = current.smoke_exposed;
+                    }
                     current.type = Exit;
                     //std::cout << "FIXME when -p 1" << std::endl;
                     break;
                 case PersonWithSmoke:
                     stat.smoke_exposed += 1;
+                    current.smoke_exposed += 1;
                     // remember person position
                     people.push_back(CellPosition(row, col));
                 default:
@@ -111,6 +121,22 @@ bool CA::evolve()
 
     // Recompute exit distances
     recompute_shortest_paths();
+
+    // Propagate smoke
+    for (auto &c : smoke_cells) {
+        auto & current = cell(c);
+        if (current.type == Obstacle) {
+            current.type = ObstacleWithSmoke;
+        }
+        else if (current.type == Person) {
+            current.type = PersonWithSmoke;
+            current.smoke_exposed++;
+            stat.smoke_exposed += 1;
+        }
+        else {
+            current.type = Smoke;
+        }
+    }
 
     // Propagate people
     res = !people.empty();
@@ -142,6 +168,8 @@ bool CA::evolve()
                 stat.moves += 1;
                 cell(person).type =
                     cell(person).type == Person ? Empty : Smoke;
+                cell(next_cell).smoke_exposed = cell(person).smoke_exposed;
+                cell(person).smoke_exposed = 0;
                 auto &next_type = cell(next_cell).type;
                 if (next_type == Smoke) {
                     next_type = PersonWithSmoke;
@@ -184,7 +212,7 @@ void CA::add_smoke(int smoke)
 
 // somehow distribute people over empty cells
 void CA::add_people(int people_count)
-{{{ 
+{{{
     stat.pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
@@ -228,12 +256,12 @@ void CA::recompute_shortest_paths() {
     std::vector<std::vector<double>> accruals(
 		this->height, std::vector<double>(this->width)
 	);
-	
+
 	// Vector of visited states
     std::vector<std::vector<bool>> visited(
 		this->height, std::vector<bool>(this->width)
 	);
-	
+
 	// Vector of pushed states
     std::vector<std::vector<bool>> pushed(
 		this->height, std::vector<bool>(this->width)
@@ -264,14 +292,14 @@ void CA::recompute_shortest_paths() {
 
     // Vector of unprocessed states
     std::vector<CellPosition> unprocessed;
-    
+
     // Push exit states
     for(auto es: exit_states) {
     	unprocessed.push_back(es);
     	distances[es.first][es.second] = 0.0;
     	pushed[es.first][es.second] = true;
     }
-    
+
     // Process all states
     while(!unprocessed.empty()) {
 		// Find unprocessed state with minimum exit distance
@@ -292,7 +320,7 @@ void CA::recompute_shortest_paths() {
         unprocessed[min] = unprocessed.back();
 		unprocessed.pop_back();
 		visited[current.first][current.second] = true;
-        
+
         // Cell types that are considered reachable
         constexpr int succTypes =  Empty | Exit | Person | Smoke
            | PersonAppearance | PersonAtExit | PersonWithSmoke;
@@ -358,7 +386,7 @@ void CA::recompute_shortest_paths()
             accruals[row][col] = accrual;
         }
     }
-    
+
     // Apply Dijkstra for each exit state and keep minimum distances
     for(auto es: exit_states) {
     	// Initialize current distances
@@ -406,7 +434,7 @@ void CA::recompute_shortest_paths()
             unprocessed[min] = unprocessed.back();
 			unprocessed.pop_back();
 			visited[current.first][current.second] = true;
-            
+
             // Skip if the distance is no better then current mininum
             if(current_distance > min_distances[current.first][current.second]) {
             	continue;
@@ -500,14 +528,15 @@ std::string Statistics::str() const noexcept
     ss << "*********************************************************\n";
     float travelled = moves * cell_width;
     float realtime = time * time_step;
-    ss << "Total pedestrians                 : " << pedestrians
+    ss << "Total pedestrians                  : " << pedestrians
         << std::endl;
-//    std::cout << "Exit total size                   : " << std::endl;
-    ss << "Total evacuation time             : " << realtime << " s"
+    ss << "Total evacuation time              : " << realtime << " s"
         << std::endl;
-    ss << "Mean time per person in smoke     : "
+    ss << "Mean time per person in smoke      : "
         << smoke_exposed * time_step / pedestrians << " s" << std::endl;
-    ss << "Mean evacuation time per person   : "
+    ss << "Max time in smoke                  : "
+        << max_smoke_exposed * time_step << " s" << std::endl;
+    ss << "Mean evacuation time per perso n   : "
         << evac_time * time_step / pedestrians << " s" << std::endl;
     ss << "Total distance travelled           : " << travelled << " m"
         << std::endl;
@@ -523,10 +552,11 @@ void Statistics::aggregate(Statistics &other) {
 	smoke_exposed += other.smoke_exposed;
 	moves += other.moves;
 	evac_time += other.evac_time;
+	max_smoke_exposed += other.max_smoke_exposed;
 }
 
 void Statistics::normalize() {
-	time /= runs;	
+	time /= runs;
 	smoke_exposed /= runs;
 	moves /= runs;
 	evac_time /= runs;

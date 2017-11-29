@@ -3,6 +3,8 @@
  * Simulation control.
  */
 
+#pragma GCC diagnostic ignored "-Wunused-result"
+
 #include <iostream>
 #include <ctime>
 
@@ -31,7 +33,7 @@ int main(int argc, char **argv) {
     long delay = 1000 * 300;    // simulation delay (microseconds)
     int people = 100;   // persons to evacuate
     int smoke = 0;     // cells with smoke
-    
+
     // Process program arguments
     int c;              // reading the options
     int opt_cnt = 1;    // used for locating positional argument
@@ -65,14 +67,14 @@ int main(int argc, char **argv) {
     try {
         // Seed
         std::srand(std::time(0));
-        
+
         // Load model from a bitmap
         Evacuation::CA model = Evacuation::CA::load(filename);
-    
+
         // Populate the model and add smoke
         model.add_people(people);
         model.add_smoke(smoke);
-        
+
         // Uncoment this to open image with xdg-open
         if (delay > 0) {
             // Display exit distances
@@ -82,7 +84,7 @@ int main(int argc, char **argv) {
             model.show();
 
             std::system("xdg-open output.bmp");
-        }        
+        }
 
         // Simulate n times and display aggregate statistics
         Evacuation::Statistics stat;
@@ -99,6 +101,9 @@ int main(int argc, char **argv) {
                     ca.show();
                     usleep(delay);
                 }
+            }
+            if (delay > 0) {
+                ca.show();
             }
 
             // Show the final state of CA

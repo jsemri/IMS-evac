@@ -2,7 +2,7 @@
 # Compiler options
 PROG=evac
 CXX=g++
-CXXFLAGS=-std=c++14 -Wall -Wextra -pedantic  -I 3rdparty -MMD
+CXXFLAGS=-std=c++14 -Wall -Wextra -pedantic  -I 3rdparty -MMD -O3
 
 # Sources and targets
 SRCDIR=src
