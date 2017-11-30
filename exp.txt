@@ -1,0 +1,39 @@
+S = 1
+
+D1:
+Total evacuation time              : 38.9274 s
+Max time in smoke                  : 1.785 s
+
+D2:
+Total evacuation time              : 46.6167 s
+Max time in smoke                  : 4.7043 s
+
+D3:
+Total evacuation time              : 56.8332 s
+Max time in smoke                  : 7.7136 s
+
+D4:
+Total evacuation time              : 56.1024 s
+Max time in smoke                  : 9.2877 s
+
+D5-2:
+Total evacuation time              : 83.8752 s
+Max time in smoke                  : 22.4631 s
+
+D5-3:
+Total evacuation time              : 66.3378 s
+Max time in smoke                  : 12.4635 s
+
+D5-4:
+Total evacuation time              : 58.9815 s
+Max time in smoke                  : 10.4745 s
+
+----------------------------------------------
+
+E1:
+Total evacuation time              : 34.7181 s
+Max time in smoke                  : 2.7276 s
+
+E2:
+Total evacuation time              : 42.4872 s
+Max time in smoke                  : 4.5579 s

@@ -225,12 +225,12 @@ represents a distance (in cell hops) to the nearest exit.
     of adjacent cells affected by smoke and $C_{SS}$ is smoke spreading coefficient.
     A smoke propagation speed of $0.2-1.2$m/s translates to $0.15-0.9$ cells
     per step; using assumptions stated in the previous section, we choose a
-    value of normalizing coefficient $C_{SS}$ to be 0.15. 
+    value of normalizing coefficient $C_{SS}$ to be 0.2. 
     Also, note that since we model closed areas, there cannot exist a cell
     reachable by smoke that is on the boundary of the automaton, i.e.
     probability will be always proportional to $\frac{S}{T}$.
     
-    \item In one discrete step a person (states $P$ and $PS$) can any move to
+    \item In one discrete step a person (states $P$ and $PS$) can move to
     any cell in his neighbourhood, provided that i) the target cell is
     unoccupied (states $E$, $S$ and $X$) and ii) the distance to the exit
     $sd$ of the target cell is less than or equal to the one that is being
@@ -423,26 +423,40 @@ Here is a list of five scenarios we will be considering for D wing:
     (worst-case scenario)
 \end{itemize}
 
-In D1 case all exits were functional and those sitting in D105 used two closest
-ones. Those exits are not very far and therefore an extraction of forty seconds
-seems reasonable. In D2 a side exit from inside lecture room was blocked, but
-the one outside was free, so it took a little longer to evacuate because of the
-narrow entrance to D105. In D3 the same happens on the other side, which again
-makes evacuation even longer. In D4 only main entrance is preserved, but
-evacuation time is roughly the same; the reason for this is that, due to the
-narrow entrances into D105 lecture room, a large queue is created
-(see Image TODO) which seems to be the critical point. To confirm this, D5 case
-was designed. The effect here is even more substantial, which can be seen on
-Image TODO.
+Result for each case reporting total evacuation time and a maximum smoke
+exposure time are reported in Table TODO
 
+Before judging building plans, let us first inspect the result to see if they
+make sense.
+In D1 all exits were functional and those sitting in D105 used two closest ones,
+which is what one would expect to happen.
+Those exits are not very far and an extraction time of forty seconds looks
+reasonable.
+In D2 one of side exits from inside lecture room was blocked, but the one
+outside was free, so it took quite longer to evacuate because of the
+narrow entrance to D105 in the way.
+In D3 the same happens on the other side, which again makes evacuation even
+longer.
+In D4 only main entrance is preserved, but evacuation time is roughly the same;
+the reason for this is that, due to the narrow entrances into D105 lecture room,
+a large queues have been creating there, see Image TODO.
+In D5 one of this entrances is blocked and the effect here is even more
+apparent, see Image TODO.
+
+Lecture room entrances seem to be a critical place;  to confirm this, let's
+increase the width of the entrance and see what would be the impact.
+We will use modifications of D5 case and vary door width from 3 to 5.
+Results are displayed in the table TODO; results for D5 (door width of 2) are
+repeated there for comparison.
+
+It is clear that enlarging entrance(s) width will result in significantly more
+successful evacuations.
+Nonetheless, even for worst cases, smoke exposure rates are way below the
+threshold, which indicates that even in the worst case no one will suffer
+substantial damage.
+
+Let us now consider E wing. Here are the scenarios:
 \begin{itemize}
-    \item D1: a normal state
-    \item D2: one exit in D105 and one side exit in the entrance hall are
-    blocked
-    \item D3: exits from inside D105 are blocked
-    \item D4: all four side exits are blocked
-    \item D5: all side exits are blocked, one of D105 entrances is blocked
-    (worst-case scenario)
     \item E1: a normal state
     \item E2: E104 exit is blocked
     \item E3: both E104 and E105 exits are blocked
@@ -452,14 +466,10 @@ Image TODO.
     blocked, one of E112 entrances is blocked (worst-case scenario)
 \end{itemize}
 
-
-In the next experiment suite, we explore worst-case scenarios (D5 and E5) in
+In the final experiment suite, we explore worst-case scenarios (D5 and E5) in
 more detail by varying number of occupants from 100 to 500 and then varying
-number of fire source from 1 to 3. The results are reported in the table TODO
+number of fire sources from 1 to 3. The results are reported in the table TODO
 
-\subsection{Results analysis}
-Before making conclusions about quality of building plannings, let us first
-analyse obtained results to see if they make sense.
-
-
+TODO
 \section{Conclusion}
+TODO
