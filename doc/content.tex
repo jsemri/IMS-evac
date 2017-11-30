@@ -29,8 +29,7 @@ the laws of fire and smoke spreading, the principles behind people movement and
 consequences of a smoke poisoning.
 In Section 3 we invoke these concepts and introduce an abstract model [ims-9]
 of a system.
-
-{In Section 4 TODO}
+Section 4 briefly describes seletecte implementation features.
 
 {In Section 5 TODO}
 
@@ -221,14 +220,15 @@ represents a distance (in cell hops) to the nearest exit.
     become $PS$, $O$ will become $OS$).
     This probability is proportional to the number of cells with smoke in the
     neighbourhood; the exact value is computed using an expression
-    $C_{SS} \cdot \frac{N}{8}$, where $N$ is the number of adjacent cells
-    affected by smoke and $C_{SS}$ is smoke spreading coefficient.
+    $C_{SS} \cdot \frac{S}{T}$, where $T$ is a total number of adjacent
+    cells reachable by smoke (i.e. any cell but the wall) and $S$ is a number
+    of adjacent cells affected by smoke and $C_{SS}$ is smoke spreading coefficient.
     A smoke propagation speed of $0.2-1.2$m/s translates to $0.15-0.9$ cells
     per step; using assumptions stated in the previous section, we choose a
-    value of normalizing coefficient $C_{SS}$ to be 0.25. 
+    value of normalizing coefficient $C_{SS}$ to be 0.15. 
     Also, note that since we model closed areas, there cannot exist a cell
-    reachable for smoke that is on the boundary of the automaton, i.e.
-    probability will be always proportional to $\frac{N}{8}$.
+    reachable by smoke that is on the boundary of the automaton, i.e.
+    probability will be always proportional to $\frac{S}{T}$.
     
     \item In one discrete step a person (states $P$ and $PS$) can any move to
     any cell in his neighbourhood, provided that i) the target cell is
@@ -319,63 +319,59 @@ Unfortunately, we failed to find any hard statistical data about a human
 perception of the crowds or the smoke that would suggest the choice of the
 parameters, neither could we derive them based upon real life experiments, for
 obvious reasons. 
-TODO Empirical value of 5.0 for $C_{SP}$ was selected based on experiments with the 
-model; such value leads to behaviour when a person would trade an exit at a
-(spatial) distance 4.0 in favor of the exit at the distance 5.0 in order to avoid 
-the smoke; conversely, a person is not afraid to cross 0.4 meters of smoked area 
-towards exit when the next closest one is ten meters away.
-The exact same argument applies to $C_{OP}$ for which a value of 2.0 was chosen.
+TODO Empirical value of 20.0 for $C_{SP}$ was selected based on experiments with the 
+model; such value leads to behaviour when a person is afraid of the smoke poisoning
+but will not be blocked by a smoke if the nearest exit is close enough. The exact
+same argument applies to $C_{OP}$ for which a value of 10.0 was chosen.
 Yuan's model ~\cite{Yuan} also quantifies this perception by means of a set
 of parameters.
 
 \section{Implementation}
-We divide the handling of input and output from application logic. The
-input and output is based on images processing. The application core is briefly
-described in the next section.
+In this section we will briefly describe selected implementation features. Please
+note that the code is instrumented with Doxygen and the documentation is availiable
+using \texttt{make doxygen}. For information about program parameters, use
+\texttt{--help}.
 
-\subsection{Cellular Automata}
-We represent CA with class \texttt{CA} under namespace \texttt{Evacuation}.
-Implementation of class \texttt{CA} is quite simple. \texttt{CA} provides
-methods for constructing object from file, computing statistics, outputting an
-image and other useful features. The main function called \texttt{evolve},
-which returns \texttt{true} if there are still some people to evacuate, changes
-state of the automaton. Basically the whole simulation consist of few lines of
-code.
+\subsection{Input configuration (bitmap.*)}
+Description of a building is provided by means of a bitmap image (.bmp, 24-bit) where
+each pixel represents a cell.
+Such input can be created in any raster editor (e.g. MS Paint).
+\textbf{TODO color scheme}.
 
-\lstset{language=C++,
-basicstyle=\ttfamily,
-keywordstyle=\color{blue}\ttfamily,
-stringstyle=\color{red}\ttfamily,
-commentstyle=\color{magenta}\ttfamily,
-morecomment=[l][\color{magenta}]{\#}
-}
-\bigskip
-\begin{lstlisting}
-while (ca.evolve() == true)      // evolve until all people are evacuated
-{
-    usleep(simulation_time);     // wait for a while
-    ca.show();                   // show current state of the automaton
-}
-\end{lstlisting}
+After loading a building description, initial positions of people are randomly
+distributed first along $PI$ cells, then (if there are still individuals to distribute)
+along remaining unoccupied cells.
+Finally, smoke sources are randomly distributed as well.
 
-\subsection{Initial Configuration}
-The initial configuration of walls, obstacles and exits is defined by input
-pixmap. The correctness  of the input is not verified, it is left on a user.
-The initial location of people and smoke is solved by program and it is
-described in next sections.
+\subsection{Evolution of CA (evacuation.*)}
+Configuration of a CA is stored in one rectangular array.
+During a discrete step,
+we account only for cells capable of updating: first individuals (cells in states
+$P$ or $PS$) and then smoke (cells in states $S$, $PS$ or $OS$).
+All person cells are remembered to avoid propagating one person twice in one step;
+the same applies for smoke propagation.
 
-\subsubsection{People}
-The location of the people at the beginning of the simulation is by randomly
-distribution over empty cells. Cells with state $E$ and $PI$ are considered as
-initial places where people can appear. However, $PI$ cells are occupied with
-higher priority. Actually this is the only difference between these cell types.
-
-\subsubsection{Smoke}
-The initial location of smoke is also randomly distributed over empty cells.
-However, here the priority does not have any effect.
-
-% XXX
+\subsection{Simulation controller (main.cpp)}
+Controller utilizes modules mentioned above to construct the automaton,
+trigger evolution steps and collect statistics from one CA.
+In case several runs of one automaton are required (to compute average
+results), we load the image description only once and then work with
+the copy of automaton; statistics are then aggregated after each run and
+in the end the average result is computed.
 
 \section{Experiments}
+D-1 - normal state
+D-2 - exits in D105 are blocked
+D-3 - one exit in D105 and one side exit in the entrance hall are blocked
+D-4 - all 4 side exits are blocked
+D-5 - all side exits are blocked, one of theD105 entrance is
+blocked, main entrance is half-blocked (worst-case scenario)
+
+E-1 - normal state
+E-2 - E104 exit is blocked
+E-3 - E104/E105 exits are blocked
+E-4 - E104/E105 and one of the main exits are blocked
+E-5 - E104/E105 and one of the main exits are blocked, one of E112 entrances
+is blocked (worst-case scenario)
 
 \section{Conclusion}
