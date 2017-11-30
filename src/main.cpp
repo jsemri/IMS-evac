@@ -73,10 +73,6 @@ int main(int argc, char **argv) {
         // Load model from a bitmap
         Evacuation::CA model = Evacuation::CA::load(filename);
 
-        // Populate the model and add smoke
-        model.add_people(people);
-        model.add_smoke(smoke);
-
         // Uncoment this to open image with xdg-open
         if (delay > 0) {
             // Display exit distances
@@ -95,6 +91,10 @@ int main(int argc, char **argv) {
             // Copy the CA
             Evacuation::CA ca = model.copy();
 
+            // Populate the CA
+            ca.add_people(people);
+            ca.add_smoke(smoke);
+        
             // Evolve CA in loop until CA can't change its states
             while (ca.evolve()) {
                 if (delay > 0) {
@@ -110,8 +110,11 @@ int main(int argc, char **argv) {
             }
 
             // Collect statistics
-            //std::cout << ca.stat.str();
             stat.aggregate(ca.stat);
+            
+            // Progress bar
+            std::cout << "\r" << 100.0 * i / simulations << " %";
+            std::cout << std::flush;
         }
 
         // Normalize and display statistics

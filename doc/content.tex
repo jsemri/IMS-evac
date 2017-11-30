@@ -319,59 +319,147 @@ Unfortunately, we failed to find any hard statistical data about a human
 perception of the crowds or the smoke that would suggest the choice of the
 parameters, neither could we derive them based upon real life experiments, for
 obvious reasons. 
-TODO Empirical value of 20.0 for $C_{SP}$ was selected based on experiments with the 
-model; such value leads to behaviour when a person is afraid of the smoke poisoning
-but will not be blocked by a smoke if the nearest exit is close enough. The exact
-same argument applies to $C_{OP}$ for which a value of 10.0 was chosen.
+Empirical value of 20.0 for $C_{SP}$ was selected based on experiments with the 
+model; such value leads to behaviour when a person is aware of the smoke
+poisoning but will not be blocked by the smoke screen if the nearest exit is
+close enough.
+The exact same argument applies to $C_{OP}$ for which a value of 10.0 was chosen.
 Yuan's model ~\cite{Yuan} also quantifies this perception by means of a set
 of parameters.
 
 \section{Implementation}
-In this section we will briefly describe selected implementation features. Please
-note that the code is instrumented with Doxygen and the documentation is availiable
-using \texttt{make doxygen}. For information about program parameters, use
-\texttt{--help}.
+In this section we will briefly describe selected implementation features.
+Please note that the code is instrumented with Doxygen and the documentation is
+availiable using \texttt{make doxygen}.
+For information about program parameters, use \texttt{--help} option.
 
 \subsection{Input configuration (bitmap.*)}
-Description of a building is provided by means of a bitmap image (.bmp, 24-bit) where
-each pixel represents a cell.
+Description of a building is provided by means of a bitmap image (.bmp, 24-bit)
+where each pixel represents a cell.
 Such input can be created in any raster editor (e.g. MS Paint).
 \textbf{TODO color scheme}.
 
 After loading a building description, initial positions of people are randomly
-distributed first along $PI$ cells, then (if there are still individuals to distribute)
-along remaining unoccupied cells.
+distributed first along $PI$ cells, then (if there are still individuals to
+distribute) along remaining unoccupied cells.
 Finally, smoke sources are randomly distributed as well.
 
 \subsection{Evolution of CA (evacuation.*)}
 Configuration of a CA is stored in one rectangular array.
-During a discrete step,
-we account only for cells capable of updating: first individuals (cells in states
-$P$ or $PS$) and then smoke (cells in states $S$, $PS$ or $OS$).
-All person cells are remembered to avoid propagating one person twice in one step;
-the same applies for smoke propagation.
+During a discrete step, we account only for cells capable of updating: first
+individuals (cells in states $P$ or $PS$) and then smoke (cells in states $S$,
+$PS$ or $OS$).
+All person cells are remembered to avoid propagating one person twice in one
+step; the same applies for smoke propagation.
 
 \subsection{Simulation controller (main.cpp)}
 Controller utilizes modules mentioned above to construct the automaton,
-trigger evolution steps and collect statistics from one CA.
+trigger evolution steps and collect statistics about the status of CA.
 In case several runs of one automaton are required (to compute average
 results), we load the image description only once and then work with
 the copy of automaton; statistics are then aggregated after each run and
 in the end the average result is computed.
 
-\section{Experiments}
-D-1 - normal state
-D-2 - exits in D105 are blocked
-D-3 - one exit in D105 and one side exit in the entrance hall are blocked
-D-4 - all 4 side exits are blocked
-D-5 - all side exits are blocked, one of theD105 entrance is
-blocked, main entrance is half-blocked (worst-case scenario)
+\section{Case Studies}
+As was mentioned before, we focus on two existing buildings: D and E wings of a 
+FIT VUT campus.
+In both cases we are interested if building planning is suitable for carrying
+out evergency evacuations.
 
-E-1 - normal state
-E-2 - E104 exit is blocked
-E-3 - E104/E105 exits are blocked
-E-4 - E104/E105 and one of the main exits are blocked
-E-5 - E104/E105 and one of the main exits are blocked, one of E112 entrances
-is blocked (worst-case scenario)
+For each of the wings we created its bitmap analog using the plans
+(see Image. ) and by in-field inspection.
+For each object (wall, table, vending machine etc.) we estimate error in either
+of its dimensions to be +-0.2 meters (half of the length of one cell side).
+Using $PI$ cell states we specified primary positions for individuals
+(students) - students primarily occupy seats in lecture rooms, some may be in
+the halls - which simulates a common study session.
+For each of the wings we created five different scenarios that describe
+various building configurations, from normal state to the case where some of
+the exits or even room entrances are blocked/closed.
+
+In each experiment we compute a total evacuation time (time interval between
+alarm going off and extraction of the last individual).
+We are also interested in the time each individual was exposed to the smoke;
+in each experiment we report a maximum value.
+We are interested if this value will not exceed a threshold of 5 minutes.
+With the purpose of obtaining acceptable statistical data, the final results are
+obtained by averaging results of 1000 independent replications of each
+experiment.
+
+\subsection{Description of buildings}
+A ground floor of the D section consists of a lecture room D105 with capacity of
+300 and a vestibule that is approximately half the size of the lecture room.
+There are two narrow entrances to the lecture room from the entrance hall.
+There are a total of five exits from the building, a primary one on the east
+side, a pair of exits on the north/south side of the vestibule and a similar
+pair inside the lecture room.
+Note that a south vestibul exit leads to the corridor between D and A segments
+where an actual exit is placed.
+
+A ground floor of the E section consists of a lecture room E112 with capacity of
+156, two smaller lecture rooms E104 & E105 of capacity 72 each, several toilets,
+a maintenance room and a corridor in between.
+There are two narrow entrances to the E112, and one entrance into E104 and
+E105 each.
+There are a total of four exits, each situated on the east side of the building:
+two from the hall in the middle and two from inside E104 and E105 lecture rooms.
+There is also a corridor linking E and C segments where another exit is
+situated, but it is too far away and requires blocking of all four E exits in
+order to be used; since it is not even considered in evacuation plans, C section
+was completely ommitted.
+
+\subsection{Experiments}
+In all of the cases we consider a number of individuals to be 350 (full
+attendance + someone in the halls) and one random source of fire.
+Here is a list of five scenarios we will be considering for D wing:
+
+\begin{itemize}
+    \item D1: a normal state
+    \item D2: one exit in D105 and one side exit in the entrance hall are
+    blocked
+    \item D3: exits from inside D105 are blocked
+    \item D4: all four side exits are blocked
+    \item D5: all side exits are blocked, one of D105 entrances is blocked
+    (worst-case scenario)
+\end{itemize}
+
+In D1 case all exits were functional and those sitting in D105 used two closest
+ones. Those exits are not very far and therefore an extraction of forty seconds
+seems reasonable. In D2 a side exit from inside lecture room was blocked, but
+the one outside was free, so it took a little longer to evacuate because of the
+narrow entrance to D105. In D3 the same happens on the other side, which again
+makes evacuation even longer. In D4 only main entrance is preserved, but
+evacuation time is roughly the same; the reason for this is that, due to the
+narrow entrances into D105 lecture room, a large queue is created
+(see Image TODO) which seems to be the critical point. To confirm this, D5 case
+was designed. The effect here is even more substantial, which can be seen on
+Image TODO.
+
+\begin{itemize}
+    \item D1: a normal state
+    \item D2: one exit in D105 and one side exit in the entrance hall are
+    blocked
+    \item D3: exits from inside D105 are blocked
+    \item D4: all four side exits are blocked
+    \item D5: all side exits are blocked, one of D105 entrances is blocked
+    (worst-case scenario)
+    \item E1: a normal state
+    \item E2: E104 exit is blocked
+    \item E3: both E104 and E105 exits are blocked
+    \item E4: both E104 and E105 exits are blocked, one of the main exits is
+    blocked
+    \item E5: both E104 and E105 exits are blocked, one of the main exits is
+    blocked, one of E112 entrances is blocked (worst-case scenario)
+\end{itemize}
+
+
+In the next experiment suite, we explore worst-case scenarios (D5 and E5) in
+more detail by varying number of occupants from 100 to 500 and then varying
+number of fire source from 1 to 3. The results are reported in the table TODO
+
+\subsection{Results analysis}
+Before making conclusions about quality of building plannings, let us first
+analyse obtained results to see if they make sense.
+
 
 \section{Conclusion}
