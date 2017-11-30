@@ -524,25 +524,24 @@ void CA::show()
 std::string Statistics::str() const noexcept
 {{{
 	std::ostringstream ss;
-    // TODO exits - number, size, loading
-    ss << "*********************************************************\n";
-    float travelled = moves * cell_width;
+    //ss << "*********************************************************\n";
+    //float travelled = moves * cell_width;
     float realtime = time * time_step;
-    ss << "Total pedestrians                  : " << pedestrians
+    ss << "Number of pedestrians              : " << pedestrians
         << std::endl;
     ss << "Total evacuation time              : " << realtime << " s"
         << std::endl;
-    ss << "Mean time per person in smoke      : "
-        << smoke_exposed * time_step / pedestrians << " s" << std::endl;
+    /*ss << "Mean time per person in smoke      : "
+        << smoke_exposed * time_step / pedestrians << " s" << std::endl;*/
     ss << "Max time in smoke                  : "
         << max_smoke_exposed * time_step << " s" << std::endl;
-    ss << "Mean evacuation time per perso n   : "
-        << evac_time * time_step / pedestrians << " s" << std::endl;
-    ss << "Total distance travelled           : " << travelled << " m"
-        << std::endl;
-    ss << "Mean distance travelled per person : "
-        << travelled / pedestrians << " m" << std::endl;
-    ss << "*********************************************************\n";
+    /*ss << "Mean evacuation time per person    : "
+        << evac_time * time_step / pedestrians << " s" << std::endl;*/
+    /*ss << "Total distance travelled           : " << travelled << " m"
+        << std::endl;*/
+    /*ss << "Mean distance travelled per person : "
+        << travelled / pedestrians << " m" << std::endl;*/
+    //ss << "*********************************************************\n";
 
     return ss.str();
 }}}
@@ -555,9 +554,10 @@ void Statistics::aggregate(Statistics &other) {
 	max_smoke_exposed += other.max_smoke_exposed;
 }
 
-void Statistics::normalize() {
+void Statistics::normalize(unsigned runs) {
 	time /= runs;
 	smoke_exposed /= runs;
 	moves /= runs;
 	evac_time /= runs;
+    max_smoke_exposed /= runs;
 }

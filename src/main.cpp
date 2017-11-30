@@ -15,9 +15,6 @@
 #include "evacuation.h"
 #include "bitmap.h"    // remove after debug
 
-/** Number of simulations to perform. */
-constexpr int simulations = 1;
-
 /** --help string. */
 static const char *helpstr =
 "Program for simulating evacuation of building.\n"
@@ -25,19 +22,21 @@ static const char *helpstr =
 "  -h            : show this help and exit\n"
 "  -t <DELAY>    : set delay of next step of evolution in ms, default 300\n"
 "  -p <N>        : number of people to evacuate, default 100\n"
-"  -s <N>        : number of cells with smoke, default 0\n";
+"  -s <N>        : number of cells with smoke, default 0\n"
+"  -r <N>		 : number os simulation runs";
 
 /** Entry point. */
 int main(int argc, char **argv) {
     // Arguments:
-    long delay = 1000 * 300;    // simulation delay (microseconds)
+    long delay = 0;    // simulation delay (microseconds)
     int people = 100;   // persons to evacuate
     int smoke = 0;     // cells with smoke
+    int simulations = 1; // simulation runs
 
     // Process program arguments
     int c;              // reading the options
     int opt_cnt = 1;    // used for locating positional argument
-    while ((c = getopt(argc, argv, "ht:p:s:")) != -1) {
+    while ((c = getopt(argc, argv, "ht:p:s:r:")) != -1) {
         opt_cnt += 2;
         switch (c) {
             case 'h':
@@ -51,6 +50,9 @@ int main(int argc, char **argv) {
                 break;
             case 's':
                 smoke = std::stoi(optarg);
+                break;
+            case 'r':
+                simulations = std::stoi(optarg);
                 break;
             default:
                 return EXIT_FAILURE;
@@ -103,20 +105,17 @@ int main(int argc, char **argv) {
                 }
             }
             if (delay > 0) {
+            	// Show the final state of CA
                 ca.show();
             }
-
-            // Show the final state of CA
-            //ca.show();  // comment this for statistic collecting
 
             // Collect statistics
             //std::cout << ca.stat.str();
             stat.aggregate(ca.stat);
-            stat.runs++;
         }
 
         // Normalize and display statistics
-        stat.normalize();
+        stat.normalize(simulations);
         std::cout << stat.str();
     }
     catch (std::exception &e) {

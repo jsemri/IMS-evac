@@ -69,14 +69,12 @@ public:
     double moves;
     /** Evacuation time (steps). */
     double evac_time;
-    /** Number of simulations. */
-    int runs;
     /** Max person smoke expose*/
     double max_smoke_exposed;
 
 	Statistics() :
 		pedestrians{0}, time{0.0}, smoke_exposed{0.0},
-		moves{0.0}, evac_time{0.0}, runs{0}, max_smoke_exposed{0.0}
+		moves{0.0}, evac_time{0.0}, max_smoke_exposed{0.0}
     {}
 
     /** String representation of statistics. */
@@ -86,7 +84,7 @@ public:
     void aggregate(Statistics &other);
 
     /** Normalize statistics for final output. */
-    void normalize();
+    void normalize(unsigned runs);
 };
 
 /** Cell structure. */
