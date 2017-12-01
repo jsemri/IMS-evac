@@ -329,9 +329,10 @@ The exact same argument applies to $C_{OP}$ for which a value of 10.0 was chosen
 Yuan's model ~\cite{Yuan} also quantifies this perception by means of a set
 of parameters.
 
-Figure~\ref{fig:perceived} illustrates the phenomenon. A person (red dot)
-standing on the left side of the lecture room will move towards right exit
-(using 'warmer' cells) because the left one is blocked by a smoke screen.
+Figure~\ref{fig:perceived} illustrates the phenomenon.
+A person standing on the left side of the room will move
+towards right exit (via 'warmer' cells) because the left one is blocked by a
+smoke screen.
 
 \section{Implementation}
 In this section we will briefly describe selected implementation features.
@@ -374,6 +375,8 @@ out emergency evacuations.
 
 For each of the segments we created their bitmap analogs using the plans
 (see Image. ) and by in-field inspection.
+Results are displayed in Figure~\ref{fig-d} and Figure~\ref{fig-e}.
+
 For each object (wall, table, vending machine etc.) we estimate error in either
 of its dimensions to be +-0.2 meters (half of the length of one cell side).
 Using $PI$ cell states we specified primary positions for individuals
@@ -449,6 +452,7 @@ Here is a list of five scenarios we will be considering for D wing:
     (worst-case scenario)
 \end{itemize}
 
+Bitmaps for each of the cases can be found in \texttt{experiments} folder.
 Results for each case reporting total evacuation time and a maximum smoke
 exposure time are displayed in Table \ref{table:results_d}.
 
@@ -464,36 +468,36 @@ exposure time are displayed in Table \ref{table:results_d}.
 \label{table:results_d}
 \end{center}
 
-Before judging building plans, let us first inspect the results to see if they
-make sense.
+Before evaluating building plans, let us first inspect the results to see if
+they make sense.
 In D1 all exits were functional and those sitting in D105 used two closest ones,
 which is what one would expect to happen.
 Those exits are not very far and an extraction time of forty seconds looks
 reasonable.
-In D2 one of side exits from inside the lecture room was blocked, but the one
+In D2 one of side exits from inside the lecture room was blocked, the one
 outside was free, but it took quite longer to evacuate because of the
 narrow door in the way.
 In D3 the same happens on the other side, which again makes evacuation even
 longer.
 In D4 only main entrance is preserved, but evacuation time is roughly the same;
-the reason for this is that, in both D3 and D4 cases, due to the narrow
-entrances into D105 lecture room, large queues have been creating there
-(see Image TODO), which is the main source of delay.
+the reason for this is that, in both D3 and D4 cases, large queues had had
+created at the narrow exits from the lecture room
+(see Figure~\ref{fig:fig-d4}), which is the main source of delay.
 In D5 one of this entrances is blocked and the effect here is even more
-apparent, see Image TODO.
+apparent, see Figure~\ref{fig:fig-d5}.
 This event is known as \emph{bottleneck effect}.
 
-Lecture room entrances seem to be a critical point;  to confirm this, let's
-increase the width of the entrance and see what would be the impact.
-We will use modifications of D5 case and vary door width from 2(D5) to 3 (D5-3)
+Lecture room entrances seem to be a critical point; to confirm this, let's
+increase the door width and see what will be the impact.
+We use modifications of D5 case and vary door width from 2(D5) to 3 (D5-3)
 and 4 (D5-4).
-Results are displayed in the table TODO.
+Results are displayed in the table \ref{table:results_d}.
 
 It is clear that enlarging entrance(s) width will result in significantly more
-successful evacuations.
-This should not necessarily mean that occupants must break down walls;
+successful evacuation.
+Note that this should not necessarily mean that occupants must break down walls;
 a door to D105 room has a (re-)movable part that is usually held fixed and
-occupants should not forget about it in panic.
+occupants should not forget about it.
 
 Let us now consider E wing. These are scenarios:
 \begin{itemize}
@@ -525,18 +529,59 @@ results.
 In the final experiment suite, we explore worst-case scenarios (D5 and E5) in
 more detail by varying a number of occupants from 200 to 500 and then varying
 a number of fire sources from 1 to 3.
-The results are reported in Table \ref{table:results_w}.
+The results are displayed separately for D (Table~\ref{table:results_d5})
+and E (Table~\ref{table:results_e5}) wings.
+Again, we report a total evacuation time (e) and a smoke exposure time (s),
+both in seconds.
 
 \begin{center}
-    \label{table:results_w}
-    \begin{tabular}{ | l | c | r }
-        \hline        
+    \label{table:results_d5}
+    \begin{tabular}{ c | c | c | c | c }
+        \hline
+        Occupants & 200 & 300 & 400 & 500 \\
+        1 smoke source(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
+        2 smoke sources(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
+        3 smoke sources(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
         \hline
     \end{tabular}
 \end{center}
 
-Nonetheless, in all experiments smoke exposure rates are way below the threshold,
-which indicates that even in the worst case no one should suffer substantial damage.
+
+\begin{center}
+    \label{table:results_e5}
+    \begin{tabular}{ c | c | c | c | c }
+        \hline
+        Occupants & 200 & 300 & 400 & 500 \\
+        1 smoke source(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
+        2 smoke sources(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
+        3 smoke sources(e) & 0 & 0 & 0 & 0 \\
+        (s) & 0 & 0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+It is clear that increasing a number of individuals will increase both
+evacuation time and smoke exposure; increasing number of smoke sources, however,
+will only increase the latter.
+Nonetheless, in all of our experiments smoke exposure rates are way below the
+threshold, which indicates that even in the worst case no one should suffer
+substantial damage.
+Therefore, we declare both D and E wings to be suitable for emergency
+evacuations.
 
 \section{Conclusion}
-TODO
+In this project we considered a suitability of D and E wings of a FIT VUT campus
+for emergency evacuations due to the threat of fire.
+Inspired by research by Tissera et al.~\cite{Tissera1, Tissera2} and
+Yuan et al.~\cite{Yuan} and, exploiting concepts of fire and smoke spreading and
+crowd dynamics, we designed a model of these complex phenomena based on
+cellular automata.
+We designed a diverse experiment suite representing different fire scenarios.
+Evaluating these cases we collected various statistics that allowed us to
+declare that both building of interest are indeed suitable for emergency
+evacuations.
