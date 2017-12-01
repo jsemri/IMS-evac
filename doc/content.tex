@@ -167,7 +167,7 @@ whether an extraction can be considered successful.
 
 \section{Model Description}
 Let us first describe a simplified version of a model to familiarize the reader
-with  the basic rules; later we will introduce one advanced property that
+with the basic rules; later we will introduce one advanced property that
 completes the model.
 We consider a finite two-dimensional grid of square cells with closed
 boundaries; each cell represents a $0.4 \times 0.4$ meters square, which is
@@ -176,7 +176,7 @@ density~\cite{Density1, Density2}.
 We use \emph{Moore Neighbourhood}~\cite{Moore}, which is a common choice when
 one wants to allow a cell to act along all possible directions.
 A discrete time step represents 0.3 seconds of real time, which is estimated to
-be  the time required for a pedestrian to move 0.4 meters (size of a cell
+be the time required for a pedestrian to move 0.4 meters (size of a cell
 side)~\cite{Density1}.
 
 \subsection{Cell States}
@@ -197,7 +197,7 @@ $$Q = \{W,O,P,S,E,X,PS,OS,PX\}$$ where:
 A \emph{Wall} cell represents an external or internal wall that cannot be
 occupied by a person or be penetrated by smoke; \emph{Obstacle} cells (tables,
 vending machines etc.) also serve as a barrier for individuals, but do not stop
-the smoke spreading (hence $OS$ exists as well).
+the smoke spreading ($OS$ exists as well).
 Other state names are self-explanatory.
 
 There is one more cell state, $PI$ (Person Initial position) which is used
@@ -221,14 +221,12 @@ represents a distance (in cell hops) to the nearest exit.
     This probability is proportional to the number of cells with smoke in the
     neighbourhood; the exact value is computed using an expression
     $C_{SS} \cdot \frac{S}{T}$, where $T$ is a total number of adjacent
-    cells reachable by smoke (i.e. any cell but the wall) and $S$ is a number
-    of adjacent cells affected by smoke and $C_{SS}$ is smoke spreading coefficient.
+    cells reachable by smoke (i.e. any cell but the wall), $S$ is a number
+    of adjacent cells affected by smoke and $C_{SS}$ is smoke spreading
+    coefficient.
     A smoke propagation speed of $0.2-1.2$m/s translates to $0.15-0.9$ cells
     per step; using assumptions stated in the previous section, we choose a
-    value of normalizing coefficient $C_{SS}$ to be 0.2. 
-    Also, note that since we model closed areas, there cannot exist a cell
-    reachable by smoke that is on the boundary of the automaton, i.e.
-    probability will be always proportional to $\frac{S}{T}$.
+    value of normalizing coefficient $C_{SS}$ to be 0.2.
     
     \item In one discrete step a person (states $P$ and $PS$) can move to
     any cell in his neighbourhood, provided that i) the target cell is
@@ -251,6 +249,9 @@ all the edges connecting adjacent cells have weight one.
 Having multiple exits, a modified version of the Dijkstra's shortest path
 algorithm is applied where the edges are reversed and exits (destinations) are
 treated as sources (multiple source to single destination, MSSD)~\cite{Dijkstra}.
+Each cell then is characterized by its distance to the nearest exit.
+Image~\ref{fig:f_dijkstra} provides an illustration: exit distances are
+displayed in colors where warmer colors refer to smaller exit distances.
 
 As was mentioned before, a person will try to move closer to the exit by
 selecting those adjacent cells that have an $sd$ value less than the one that
@@ -262,11 +263,12 @@ The order of update is random and is different during every step in order to
 avoid any bias.
 
 In case a person cannot move to the cell nearer to exit (because it is being 
-occupied by another person), with certain probability he can move to the cell
-with the same spatial distance.
-This probability is denoted as \emph{chaosTODO} and has a value of TODO.
+occupied by another person), with certain probability he can move to the
+cell with the same spatial distance.
+This probability is denoted as \emph{C_{bp}} (by-passing) and has a value
+of 0.25.
 This approach solves an issue addressed by Tissera et al.~\cite{Tissera1} when 
-blocked individuals were standing still which sometimes leads to unrealistic 
+blocked individuals were standing still which usually leads to unrealistic 
 behaviour.
 This probabilistic shift can also simulate by-passing (on a local scope) of
 blockers ahead.
@@ -327,6 +329,10 @@ The exact same argument applies to $C_{OP}$ for which a value of 10.0 was chosen
 Yuan's model ~\cite{Yuan} also quantifies this perception by means of a set
 of parameters.
 
+Figure~\ref{fig:perceived} illustrates the phenomenon. A person (red dot)
+standing on the left side of the lecture room will move towards right exit
+(using 'warmer' cells) because the left one is blocked by a smoke screen.
+
 \section{Implementation}
 In this section we will briefly describe selected implementation features.
 Please note that the code is instrumented with Doxygen and the documentation is
@@ -363,10 +369,10 @@ in the end the average result is computed.
 \section{Case Studies}
 As was mentioned before, we focus on two existing buildings: D and E wings of a 
 FIT VUT campus.
-In both cases we are interested if building planning is suitable for carrying
-out evergency evacuations.
+In both cases we are interested if architectural plans are suitable for carrying
+out emergency evacuations.
 
-For each of the wings we created its bitmap analog using the plans
+For each of the segments we created their bitmap analogs using the plans
 (see Image. ) and by in-field inspection.
 For each object (wall, table, vending machine etc.) we estimate error in either
 of its dimensions to be +-0.2 meters (half of the length of one cell side).
@@ -377,31 +383,31 @@ For each of the wings we created five different scenarios that describe
 various building configurations, from normal state to the case where some of
 the exits or even room entrances are blocked/closed.
 
-In each experiment we compute a total evacuation time (time interval between
-alarm going off and extraction of the last individual).
+In each experiment we compute a total evacuation time: a time interval between
+alarm going off and an extraction of the last individual.
 We are also interested in the time each individual was exposed to the smoke;
 in each experiment we report a maximum value.
 We are interested if this value will not exceed a threshold of 5 minutes.
 With the purpose of obtaining acceptable statistical data, the final results are
-obtained by averaging results of 1000 independent replications of each
+obtained by averaging results of 10000 independent replications of each
 experiment.
 
 \subsection{Description of buildings}
 A ground floor of the D section consists of a lecture room D105 with capacity of
-300 and a vestibule that is approximately half the size of the lecture room.
-There are two narrow entrances to the lecture room from the entrance hall.
-There are a total of five exits from the building, a primary one on the east
+300 and a vestibule that is approximately half the size of the lecture room;
+there are two narrow entrances into the lecture room from the entrance hall;
+there are a total of five exits from the building: primary one on the east
 side, a pair of exits on the north/south side of the vestibule and a similar
 pair inside the lecture room.
-Note that a south vestibul exit leads to the corridor between D and A segments
-where an actual exit is placed.
+Note that a south vestibule exit leads to the corridor between D and A segments
+where an actual exit is located.
 
 A ground floor of the E section consists of a lecture room E112 with capacity of
-156, two smaller lecture rooms E104 & E105 of capacity 72 each, several toilets,
-a maintenance room and a corridor in between.
-There are two narrow entrances to the E112, and one entrance into E104 and
-E105 each.
-There are a total of four exits, each situated on the east side of the building:
+156, two smaller lecture rooms E104 \& E105 of capacity 72 each, several toilets,
+a maintenance room and a corridor in between;
+there are two narrow entrances into the E112 and one entrance into E104 and
+E105 each;
+there are a total of four exits, each situated on the east side of the building:
 two from the hall in the middle and two from inside E104 and E105 lecture rooms.
 There is also a corridor linking E and C segments where another exit is
 situated, but it is too far away and requires blocking of all four E exits in
@@ -410,7 +416,27 @@ was completely ommitted.
 
 \subsection{Experiments}
 In all of the cases we consider a number of individuals to be 350 (full
-attendance + someone in the halls) and one random source of fire.
+attendance + someone in the halls) and one random source of fire. For each wing
+we will consider several fire scenarios that mostly differ by an availiability
+of selected exits, i.e. some exits or doors are made locked.
+
+These cases are not as unrealistic as they seem, e.g. side exits from inside D105 are
+usually locked and are unlocked automatically when emergency occurs.
+In case a fire causes (or was caused by) a wiring fault, there is a probability
+that the doors might remain locked.
+Furthemore, these exits are always covered by external mechanical window blinds,
+which undoubtfully slows evacuation down.
+The exact same argument applies to exits from within E104 and E105 lecture
+rooms.
+Next, during our study we witnessed several cases when one of the entrances
+to D105 or E112 was locked for no apparent reason and a handyman had had to fix
+it.
+The last argument might sound strange, but the fact is, most of the students we
+interviewed did not even know that there are exits from E104 and E105 lecture rooms.
+During emergency, a group effect may take place and even those who know about
+the existence of these exits might panic and forget about them while following
+the majority that heads to the corridors.
+
 Here is a list of five scenarios we will be considering for D wing:
 
 \begin{itemize}
@@ -423,39 +449,53 @@ Here is a list of five scenarios we will be considering for D wing:
     (worst-case scenario)
 \end{itemize}
 
-Result for each case reporting total evacuation time and a maximum smoke
-exposure time are reported in Table TODO
+Results for each case reporting total evacuation time and a maximum smoke
+exposure time are displayed in Table \ref{table:results_d}.
 
-Before judging building plans, let us first inspect the result to see if they
+\begin{center}
+    \begin{tabular}{ c | c | c | c | c | c | c | c }
+        \hline
+        Case & D1 & D2 & D3 & D4 & D5 & D5-3 & D5-4 \\
+        \hline
+        Evacuation time (seconds) & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        Maximum exposure (seconds) & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+\label{table:results_d}
+\end{center}
+
+Before judging building plans, let us first inspect the results to see if they
 make sense.
 In D1 all exits were functional and those sitting in D105 used two closest ones,
 which is what one would expect to happen.
 Those exits are not very far and an extraction time of forty seconds looks
 reasonable.
-In D2 one of side exits from inside lecture room was blocked, but the one
-outside was free, so it took quite longer to evacuate because of the
-narrow entrance to D105 in the way.
+In D2 one of side exits from inside the lecture room was blocked, but the one
+outside was free, but it took quite longer to evacuate because of the
+narrow door in the way.
 In D3 the same happens on the other side, which again makes evacuation even
 longer.
 In D4 only main entrance is preserved, but evacuation time is roughly the same;
-the reason for this is that, due to the narrow entrances into D105 lecture room,
-a large queues have been creating there, see Image TODO.
+the reason for this is that, in both D3 and D4 cases, due to the narrow
+entrances into D105 lecture room, large queues have been creating there
+(see Image TODO), which is the main source of delay.
 In D5 one of this entrances is blocked and the effect here is even more
 apparent, see Image TODO.
+This event is known as \emph{bottleneck effect}.
 
-Lecture room entrances seem to be a critical place;  to confirm this, let's
+Lecture room entrances seem to be a critical point;  to confirm this, let's
 increase the width of the entrance and see what would be the impact.
-We will use modifications of D5 case and vary door width from 3 to 5.
-Results are displayed in the table TODO; results for D5 (door width of 2) are
-repeated there for comparison.
+We will use modifications of D5 case and vary door width from 2(D5) to 3 (D5-3)
+and 4 (D5-4).
+Results are displayed in the table TODO.
 
 It is clear that enlarging entrance(s) width will result in significantly more
 successful evacuations.
-Nonetheless, even for worst cases, smoke exposure rates are way below the
-threshold, which indicates that even in the worst case no one will suffer
-substantial damage.
+This should not necessarily mean that occupants must break down walls;
+a door to D105 room has a (re-)movable part that is usually held fixed and
+occupants should not forget about it in panic.
 
-Let us now consider E wing. Here are the scenarios:
+Let us now consider E wing. These are scenarios:
 \begin{itemize}
     \item E1: a normal state
     \item E2: E104 exit is blocked
@@ -466,10 +506,37 @@ Let us now consider E wing. Here are the scenarios:
     blocked, one of E112 entrances is blocked (worst-case scenario)
 \end{itemize}
 
-In the final experiment suite, we explore worst-case scenarios (D5 and E5) in
-more detail by varying number of occupants from 100 to 500 and then varying
-number of fire sources from 1 to 3. The results are reported in the table TODO
+The results are reported in Table \ref{table:results_e}.
+Again, as we gradually block majority of exits, we inspect similar behaviour and
+results.
 
-TODO
+\begin{center}
+    \label{table:results_e}
+    \begin{tabular}{ c | c | c | c | c | c }
+        \hline
+        Case & E1 & E2 & E3 & E4 & E5 \\
+        \hline
+        Evacuation time (seconds) & 0 & 0 & 0 & 0 & 0 \\
+        Maximum exposure (seconds) & 0 & 0 & 0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+In the final experiment suite, we explore worst-case scenarios (D5 and E5) in
+more detail by varying a number of occupants from 200 to 500 and then varying
+a number of fire sources from 1 to 3.
+The results are reported in Table \ref{table:results_w}.
+
+\begin{center}
+    \label{table:results_w}
+    \begin{tabular}{ | l | c | r }
+        \hline        
+        \hline
+    \end{tabular}
+\end{center}
+
+Nonetheless, in all experiments smoke exposure rates are way below the threshold,
+which indicates that even in the worst case no one should suffer substantial damage.
+
 \section{Conclusion}
 TODO

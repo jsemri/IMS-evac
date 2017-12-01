@@ -2,13 +2,14 @@
 exe='./evac';
 dir='./experiments';
 
-pedestrians=350;
-smoke=1;
-simulations=1000;
-opt="-t 0 -p $pedestrians -s $smoke -r $simulations";
+pedestrians=1;
+smoke=20;
+simulations=1;
+delay=10;
+opt="-t $delay -p $pedestrians -s $smoke -r $simulations";
 
 cases=(
-	#'D-1.bmp'
+	'D-1.bmp'
     #'D-2.bmp'
     #'D-3.bmp'
     #'D-4.bmp'

@@ -525,22 +525,22 @@ std::string Statistics::str() const noexcept
 {{{
 	std::ostringstream ss;
     //ss << "*********************************************************\n";
-    //float travelled = moves * cell_width;
+    float travelled = moves * cell_width;
     float realtime = time * time_step;
     ss << "Number of pedestrians              : " << pedestrians
         << std::endl;
     ss << "Total evacuation time              : " << realtime << " s"
         << std::endl;
-    /*ss << "Mean time per person in smoke      : "
-        << smoke_exposed * time_step / pedestrians << " s" << std::endl;*/
+    ss << "Mean time per person in smoke      : "
+        << smoke_exposed * time_step / pedestrians << " s" << std::endl;
     ss << "Max time in smoke                  : "
         << max_smoke_exposed * time_step << " s" << std::endl;
-    /*ss << "Mean evacuation time per person    : "
-        << evac_time * time_step / pedestrians << " s" << std::endl;*/
-    /*ss << "Total distance travelled           : " << travelled << " m"
-        << std::endl;*/
-    /*ss << "Mean distance travelled per person : "
-        << travelled / pedestrians << " m" << std::endl;*/
+    ss << "Mean evacuation time per person    : "
+        << evac_time * time_step / pedestrians << " s" << std::endl;
+    ss << "Total distance travelled           : " << travelled << " m"
+        << std::endl;
+    ss << "Mean distance travelled per person : "
+        << travelled / pedestrians << " m" << std::endl;
     //ss << "*********************************************************\n";
 
     return ss.str();

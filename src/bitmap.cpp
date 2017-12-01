@@ -151,7 +151,10 @@ void Bitmap::store(CA &ca, const std::string &filename){
 }
 
 void Bitmap::display_distances(CA &ca) {
-     // Construct image
+    // Heat map scale
+    unsigned hm_scale = 100;
+    
+    // Construct image
     unsigned height = ca.height;
     unsigned width = ca.width;
     bitmap_image image(width*scale, height*scale);
@@ -161,10 +164,10 @@ void Bitmap::display_distances(CA &ca) {
         for(unsigned col = 0; col < width; col++) {
             unsigned distance = ca.cell(row,col).exit_distance;
             rgb_t color;
-            if(distance >= 200) {
+            if(distance >= hm_scale) {
                 color = black;
             } else {
-                color = jet_colormap[999-distance*5];
+                color = jet_colormap[999-distance*(1000/hm_scale)];
             }
             for(unsigned i = 0; i < scale; i++) {
                 for(unsigned j = 0; j < scale; j++) {
