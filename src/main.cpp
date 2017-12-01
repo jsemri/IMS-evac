@@ -77,12 +77,13 @@ int main(int argc, char **argv) {
         if (delay > 0) {
             // Display exit distances
             Bitmap::display_distances(model);
-            exit(1);
+
             // Display the model
             model.show();
-
+            
             std::system("xdg-open output.bmp");
             //std::system("xdg-open distances.bmp");
+            //exit(1);
         }
 
         // Simulate n times and display aggregate statistics

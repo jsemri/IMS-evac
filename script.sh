@@ -10,8 +10,8 @@ opt="-t $delay -p $pedestrians -s $smoke -r $simulations";
 
 cases=(
 	#'D1.bmp'
-    'D2.bmp'
-    #'D3.bmp'
+    #'D2.bmp'
+    'D3.bmp'
     #'D4.bmp'
     #'D5.bmp'
     #'D5-3.bmp'

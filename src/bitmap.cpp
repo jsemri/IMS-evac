@@ -10,67 +10,70 @@
 
 using namespace Evacuation;
 
+unsigned Bitmap::scale = 10;
+
 // Predefined colors
-constexpr rgb_t black = {0, 0, 0};
-constexpr rgb_t grey = {128, 128, 128};
-constexpr rgb_t white = {255, 255, 255};
+constexpr rgb_t black = {0, 0, 0};          // ?
+constexpr rgb_t brown = {150, 100, 50};     // W
+constexpr rgb_t green = {0, 255, 0};        // X
 
-constexpr rgb_t red = {255, 0, 0};
-constexpr rgb_t green = {0, 255, 0};
-constexpr rgb_t blue = {0, 0, 255};
+constexpr rgb_t white = {255, 255, 255};    // E
+constexpr rgb_t grey = {128, 128, 128};     // S
 
-constexpr rgb_t yellow = {255, 255, 0};
-constexpr rgb_t lightred = {255, 102, 102};
-constexpr rgb_t brown = {51, 25, 0};
+constexpr rgb_t orange = {255, 175, 100};   // O
+constexpr rgb_t lightgrey = {160, 160, 160};// OS
 
-constexpr rgb_t lightpink = {255, 204, 204};
-constexpr rgb_t lightgrey = {160, 160, 160};
-constexpr rgb_t orange = {255, 128, 0};
+constexpr rgb_t red = {255, 0, 0};          // P
+constexpr rgb_t lightred = {255, 100, 100}; // PS
+
+constexpr rgb_t lightpink = {255, 200, 200};// PI
 
 rgb_t Bitmap::translate(CellType type) {
     switch(type) {
+        case Wall:
+            return brown;
+        case Exit:
+            return green;
         case Empty:
         case PersonAppearance:
             return white;
-        case Wall:
-            return brown;
+        case Smoke:
+            return grey;
+        case Obstacle:
+            return orange;
+        case ObstacleWithSmoke:
+            return lightgrey;
         case Person:
         case PersonAtExit:
             return red;
-        case Exit:
-            return green;
-        case Smoke:
-            return grey;
         case PersonWithSmoke:
             return lightred;
-        case ObstacleWithSmoke:
-            return lightgrey;
-        case Obstacle:
-            return orange;
         default:
             return black;
     }
 }
 
-unsigned Bitmap::scale = 10;
-
 CellType Bitmap::translate(rgb_t rgb) {
-    if(rgb == white) {
-        return Empty;
-    } else if(rgb == grey) {
+    if (rgb == brown) {
         return Wall;
-    } else if(rgb == red) {
-        return Person;
     } else if(rgb == green) {
         return Exit;
-    } else if (rgb == lightpink) {
-        return PersonAppearance;
+    } else if(rgb == white) {
+        return Empty;
+    } else if(rgb == grey) {
+        return Smoke;
     } else if (rgb == orange) {
         return Obstacle;
     } else if (rgb == lightgrey) {
         return ObstacleWithSmoke;
-    }
-    else {
+    } else if(rgb == red) {
+        return Person;
+    } else if(rgb == lightred) {
+        return PersonWithSmoke;
+    } else if (rgb == lightpink) {
+        return PersonAppearance;
+    } else {
+        printf("%d %d %d\n", rgb.red, rgb.green, rgb.blue);
         return Wall;
     }
 }
@@ -152,7 +155,7 @@ void Bitmap::store(CA &ca, const std::string &filename){
 
 void Bitmap::display_distances(CA &ca) {
     // Heat map scale
-    unsigned hm_scale = 100;
+    unsigned hm_scale = 165;
     
     // Construct image
     unsigned height = ca.height;
