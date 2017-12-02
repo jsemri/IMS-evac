@@ -1,0 +1,306 @@
+-s 1 -p 350
+
+D1.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 39.0039 s
+Mean time per person in smoke      : 0.0877791 s
+Max time in smoke                  : 1.92405 s
+Mean evacuation time per person    : 16.4852 s
+Total distance travelled           : 4853.18 m
+Mean distance travelled per person : 13.8662 m
+
+D2.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 46.4972 s
+Mean time per person in smoke      : 0.256219 s
+Max time in smoke                  : 4.55415 s
+Mean evacuation time per person    : 21.6355 s
+Total distance travelled           : 6297.13 m
+Mean distance travelled per person : 17.9918 m
+
+D3.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 56.6286 s
+Mean time per person in smoke      : 0.598471 s
+Max time in smoke                  : 7.434 s
+Mean evacuation time per person    : 29.5467 s
+Total distance travelled           : 7950.78 m
+Mean distance travelled per person : 22.7165 m
+
+D4.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 56.4096 s
+Mean time per person in smoke      : 1.34711 s
+Max time in smoke                  : 9.2979 s
+Mean evacuation time per person    : 32.4153 s
+Total distance travelled           : 10056.7 m
+Mean distance travelled per person : 28.7333 m
+
+D5.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 83.8512 s
+Mean time per person in smoke      : 5.30893 s
+Max time in smoke                  : 21.8679 s
+Mean evacuation time per person    : 47.2069 s
+Total distance travelled           : 11366.7 m
+Mean distance travelled per person : 32.4763 m
+
+D5-3.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 66.4458 s
+Mean time per person in smoke      : 2.89562 s
+Max time in smoke                  : 12.5379 s
+Mean evacuation time per person    : 38.5695 s
+Total distance travelled           : 11247.6 m
+Mean distance travelled per person : 32.136 m
+
+D5-4.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 59.2287 s
+Mean time per person in smoke      : 2.26404 s
+Max time in smoke                  : 10.5732 s
+Mean evacuation time per person    : 35.1017 s
+Total distance travelled           : 11234.7 m
+Mean distance travelled per person : 32.0991 m
+
+--------------------------------------------------------------------------------
+-s 1 -p 350
+
+E1.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 34.8477 s
+Mean time per person in smoke      : 0.135413 s
+Max time in smoke                  : 2.8386 s
+Mean evacuation time per person    : 15.9508 s
+Total distance travelled           : 5756.57 m
+Mean distance travelled per person : 16.4473 m
+
+E2.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 42.5076 s
+Mean time per person in smoke      : 0.36113 s
+Max time in smoke                  : 4.6239 s
+Mean evacuation time per person    : 21.7734 s
+Total distance travelled           : 7880.07 m
+Mean distance travelled per person : 22.5145 m
+
+E3.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 42.4599 s
+Mean time per person in smoke      : 0.812991 s
+Max time in smoke                  : 5.7768 s
+Mean evacuation time per person    : 26.5758 s
+Total distance travelled           : 9085.35 m
+Mean distance travelled per person : 25.9581 m
+
+E4.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 55.9332 s
+Mean time per person in smoke      : 1.25279 s
+Max time in smoke                  : 7.542 s
+Mean evacuation time per person    : 33.1797 s
+Total distance travelled           : 9458.75 m
+Mean distance travelled per person : 27.025 m
+
+E5.bmp :
+Number of pedestrians              : 350
+Total evacuation time              : 74.9526 s
+Mean time per person in smoke      : 3.0965 s
+Max time in smoke                  : 15.0966 s
+Mean evacuation time per person    : 42.5205 s
+Total distance travelled           : 10345.2 m
+Mean distance travelled per person : 29.5577 m
+
+--------------------------------------------------------------------------------
+
+-p 200 -s 1
+
+D5.bmp :
+Number of pedestrians              : 200
+Total evacuation time              : 54.4104 s
+Mean time per person in smoke      : 1.76943 s
+Max time in smoke                  : 7.4208 s
+Mean evacuation time per person    : 33.0951 s
+Total distance travelled           : 6187.96 m
+Mean distance travelled per person : 30.9398 m
+
+E5.bmp :
+Number of pedestrians              : 200
+Total evacuation time              : 49.7259 s
+Mean time per person in smoke      : 1.09635 s
+Max time in smoke                  : 5.6808 s
+Mean evacuation time per person    : 30.5539 s
+Total distance travelled           : 5675.93 m
+Mean distance travelled per person : 28.3797 m
+
+-p 300 -s 1
+
+D5.bmp :
+Number of pedestrians              : 300
+Total evacuation time              : 74.0412 s
+Mean time per person in smoke      : 4.06868 s
+Max time in smoke                  : 16.3128 s
+Mean evacuation time per person    : 42.403 s
+Total distance travelled           : 9614.61 m
+Mean distance travelled per person : 32.0487 m
+
+E5.bmp :
+Number of pedestrians              : 300
+Total evacuation time              : 66.4233 s
+Mean time per person in smoke      : 2.1388 s
+Max time in smoke                  : 10.9776 s
+Mean evacuation time per person    : 38.4463 s
+Total distance travelled           : 8763.34 m
+Mean distance travelled per person : 29.2111 m
+
+-p 400 -s 1
+
+D5.bmp :
+Number of pedestrians              : 400
+Total evacuation time              : 93.537 s
+Mean time per person in smoke      : 7.0632 s
+Max time in smoke                  : 28.3014 s
+Mean evacuation time per person    : 51.9833 s
+Total distance travelled           : 13185 m
+Mean distance travelled per person : 32.9626 m
+
+E5.bmp :
+Number of pedestrians              : 400
+Total evacuation time              : 83.3547 s
+Mean time per person in smoke      : 3.94804 s
+Max time in smoke                  : 18.7104 s
+Mean evacuation time per person    : 46.5459 s
+Total distance travelled           : 11919 m
+Mean distance travelled per person : 29.7975 m
+
+-p 500 -s 1
+
+D5.bmp :
+Number of pedestrians              : 500
+Total evacuation time              : 113.211 s
+Mean time per person in smoke      : 11.0158 s
+Max time in smoke                  : 43.1778 s
+Mean evacuation time per person    : 61.6244 s
+Total distance travelled           : 16818.7 m
+Mean distance travelled per person : 33.6375 m
+
+E5.bmp :
+Number of pedestrians              : 500
+Total evacuation time              : 100.355 s
+Mean time per person in smoke      : 6.43745 s
+Max time in smoke                  : 29.9901 s
+Mean evacuation time per person    : 54.7075 s
+Total distance travelled           : 15168.2 m
+Mean distance travelled per person : 30.3363 m
+
+-p 200 -s 2
+
+D5.bmp :
+Number of pedestrians              : 200
+Total evacuation time              : 54.7746 s
+Mean time per person in smoke      : 3.58355 s
+Max time in smoke                  : 13.5381 s
+Mean evacuation time per person    : 33.337 s
+Total distance travelled           : 6230.2 m
+Mean distance travelled per person : 31.151 m
+
+E5.bmp :
+Number of pedestrians              : 200
+Total evacuation time              : 49.77 s
+Mean time per person in smoke      : 1.83503 s
+Max time in smoke                  : 8.7192 s
+Mean evacuation time per person    : 30.5854 s
+Total distance travelled           : 5705.07 m
+Mean distance travelled per person : 28.5254 m
+
+-p 300 -s 2
+
+D5.bmp :
+Number of pedestrians              : 300
+Total evacuation time              : 74.2284 s
+Mean time per person in smoke      : 7.17665 s
+Max time in smoke                  : 26.136 s
+Mean evacuation time per person    : 42.6108 s
+Total distance travelled           : 9699.14 m
+Mean distance travelled per person : 32.3305 m
+
+E5.bmp :
+Number of pedestrians              : 300
+Total evacuation time              : 66.7698 s
+Mean time per person in smoke      : 4.2375 s
+Max time in smoke                  : 18.9555 s
+Mean evacuation time per person    : 38.6348 s
+Total distance travelled           : 8831.46 m
+Mean distance travelled per person : 29.4382 m
+
+-p 400 -s 2
+
+D5.bmp :
+Number of pedestrians              : 400
+Total evacuation time              : 93.6876 s
+Mean time per person in smoke      : 11.6246 s
+Max time in smoke                  : 42.2505 s
+Mean evacuation time per person    : 52.1954 s
+Total distance travelled           : 13387.4 m
+Mean distance travelled per person : 33.4686 m
+
+E5.bmp :
+Number of pedestrians              : 400
+Total evacuation time              : 83.6307 s
+Mean time per person in smoke      : 7.39467 s
+Max time in smoke                  : 31.6176 s
+Mean evacuation time per person    : 46.7221 s
+Total distance travelled           : 12018.7 m
+Mean distance travelled per person : 30.0469 m
+
+-p 500 -s 2
+
+D5.bmp :
+Number of pedestrians              : 500
+Total evacuation time              : 113.391 s
+Mean time per person in smoke      : 16.8599 s
+Max time in smoke                  : 59.2881 s
+Mean evacuation time per person    : 61.8495 s
+Total distance travelled           : 17112.7 m
+Mean distance travelled per person : 34.2254 m
+
+E5.bmp :
+Number of pedestrians              : 500
+Total evacuation time              : 100.629 s
+Mean time per person in smoke      : 11.2384 s
+Max time in smoke                  : 46.2837 s
+Mean evacuation time per person    : 54.9297 s
+Total distance travelled           : 15287.1 m
+Mean distance travelled per person : 30.5741 m
+
+-p 200 -s 3
+
+Total evacuation time              : 54.6 s
+Max time in smoke                  : 8.7 s
+
+Total evacuation time              : 51.3 s
+Max time in smoke                  : 29.1 s
+
+-p 300 -s 3
+
+Total evacuation time              : 76.8 s
+Max time in smoke                  : 35.4 s
+
+Total evacuation time              : 65.4 s
+Max time in smoke                  : 0.6 s
+
+-p 400 -s 3
+
+Total evacuation time              : 96 s
+Max time in smoke                  : 11.1 s
+
+Total evacuation time              : 83.4 s
+Max time in smoke                  : 58.5 s
+
+-p 500 -s 3
+
+Total evacuation time              : 116.1 s
+Max time in smoke                  : 81 s
+
+Total evacuation time              : 100.8 s
+Max time in smoke                  : 71.7 s
