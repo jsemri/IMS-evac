@@ -250,7 +250,7 @@ Having multiple exits, a modified version of the Dijkstra's shortest path
 algorithm is applied where the edges are reversed and exits (destinations) are
 treated as sources (multiple source to single destination, MSSD)~\cite{Dijkstra}.
 Each cell then is characterized by its distance to the nearest exit.
-Image~\ref{fig:f_dijkstra} provides an illustration: exit distances are
+Image~\ref{fig:dijkstra} provides an illustration: exit distances are
 displayed in colors where warmer colors refer to smaller exit distances.
 
 As was mentioned before, a person will try to move closer to the exit by
@@ -265,7 +265,7 @@ avoid any bias.
 In case a person cannot move to the cell nearer to exit (because it is being 
 occupied by another person), with certain probability he can move to the
 cell with the same spatial distance.
-This probability is denoted as \emph{C_{bp}} (by-passing) and has a value
+This probability is denoted as $C_{bp}$ (by-passing) and has a value
 of 0.25.
 This approach solves an issue addressed by Tissera et al.~\cite{Tissera1} when 
 blocked individuals were standing still which usually leads to unrealistic 
@@ -334,6 +334,30 @@ A person standing on the left side of the room will move
 towards right exit (via 'warmer' cells) because the left one is blocked by a
 smoke screen.
 
+\begin{figure}
+    \includegraphics[width=0.7\textwidth]{figures/dijkstra.eps}
+    \caption{
+        Smaller exit distances are displayed in warm colors.
+        In this case a person (red dot) will move towards the closest exit
+        (green) via warmer cells.
+    }
+    \label{fig:dijkstra}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=0.7\textwidth]{figures/perceived.eps}
+    \caption{
+        In this (artificially created) case an E104 room is heavily filled with
+        smoke.
+        A person standing next to the room exit will choose to leave the room
+        and extract via central exits in order to avoid smoke intoxication.
+        However, an individual standing next to the exit will proceed straight
+        towards it.
+    }
+    \label{fig:perceived}
+\end{figure}
+
+
 \section{Implementation}
 In this section we will briefly describe selected implementation features.
 Please note that the code is instrumented with Doxygen and the documentation is
@@ -375,7 +399,20 @@ out emergency evacuations.
 
 For each of the segments we created their bitmap analogs using the plans
 (see Image. ) and by in-field inspection.
-Results are displayed in Figure~\ref{fig-d} and Figure~\ref{fig-e}.
+Results are displayed in Figure~\ref{fig:dwing}
+and Figure~\ref{fig:ewing}.
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{figures/D.eps}
+    \caption{D wing.}
+    \label{fig:dwing}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{figures/E.eps}
+    \caption{E wing.}
+    \label{fig:ewing}
+\end{figure}
 
 For each object (wall, table, vending machine etc.) we estimate error in either
 of its dimensions to be +-0.2 meters (half of the length of one cell side).
@@ -457,6 +494,8 @@ Results for each case reporting total evacuation time and a maximum smoke
 exposure time are displayed in Table \ref{table:results_d}.
 
 \begin{center}
+    \captionof{table}{TODO}
+    \label{table:results_d}
     \begin{tabular}{ c | c | c | c | c | c | c | c }
         \hline
         Case & D1 & D2 & D3 & D4 & D5 & D5-3 & D5-4 \\
@@ -465,7 +504,6 @@ exposure time are displayed in Table \ref{table:results_d}.
         Maximum exposure (seconds) & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
         \hline
     \end{tabular}
-\label{table:results_d}
 \end{center}
 
 Before evaluating building plans, let us first inspect the results to see if
@@ -480,12 +518,24 @@ narrow door in the way.
 In D3 the same happens on the other side, which again makes evacuation even
 longer.
 In D4 only main entrance is preserved, but evacuation time is roughly the same;
-the reason for this is that, in both D3 and D4 cases, large queues had had
+the reason for this is that, in both D3 and D4 cases, large queues had been
 created at the narrow exits from the lecture room
-(see Figure~\ref{fig:fig-d4}), which is the main source of delay.
+(see Figure~\ref{fig:d4bn}), which is the main source of delay.
 In D5 one of this entrances is blocked and the effect here is even more
-apparent, see Figure~\ref{fig:fig-d5}.
+apparent, see Figure~\ref{fig:d5bn}.
 This event is known as \emph{bottleneck effect}.
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{figures/d4bn.eps}
+    \caption{D4: individuals accumulate at narrow doors.}
+    \label{fig:d4bn}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{figures/d5bn.eps}
+    \caption{D5: blocking one of the doors results in disasterous effect.}
+    \label{fig:d5bn}
+\end{figure}
 
 Lecture room entrances seem to be a critical point; to confirm this, let's
 increase the door width and see what will be the impact.
@@ -515,6 +565,7 @@ Again, as we gradually block majority of exits, we inspect similar behaviour and
 results.
 
 \begin{center}
+    \captionof{table}{TODO}
     \label{table:results_e}
     \begin{tabular}{ c | c | c | c | c | c }
         \hline
@@ -535,6 +586,7 @@ Again, we report a total evacuation time (e) and a smoke exposure time (s),
 both in seconds.
 
 \begin{center}
+    \captionof{table}{TODO}
     \label{table:results_d5}
     \begin{tabular}{ c | c | c | c | c }
         \hline
@@ -551,6 +603,7 @@ both in seconds.
 
 
 \begin{center}
+    \captionof{table}{TODO}
     \label{table:results_e5}
     \begin{tabular}{ c | c | c | c | c }
         \hline
@@ -581,7 +634,8 @@ Inspired by research by Tissera et al.~\cite{Tissera1, Tissera2} and
 Yuan et al.~\cite{Yuan} and, exploiting concepts of fire and smoke spreading and
 crowd dynamics, we designed a model of these complex phenomena based on
 cellular automata.
-We designed a diverse experiment suite representing different fire scenarios.
+We then designed a diverse experiment suite representing different fire
+scenarios.
 Evaluating these cases we collected various statistics that allowed us to
 declare that both building of interest are indeed suitable for emergency
 evacuations.

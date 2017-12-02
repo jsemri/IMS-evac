@@ -4,12 +4,12 @@ dir='./experiments';
 
 pedestrians=350;
 smoke=1;
-simulations=10000;
+simulations=2000;
 delay=0;
 opt="-t $delay -p $pedestrians -s $smoke -r $simulations";
 
 cases=(
-	#'D1.bmp'
+    #'D1.bmp'
     #'D2.bmp'
     'D3.bmp'
     #'D4.bmp'
