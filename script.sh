@@ -2,7 +2,7 @@
 exe='./evac';
 dir='./experiments';
 
-pedestrians=200;
+pedestrians=500;
 smoke=3;
 simulations=1000;
 delay=0;
