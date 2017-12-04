@@ -12,7 +12,7 @@ OBJ=$(patsubst %.cpp, %.o, $(SRC))
 DEP=$(patsubst %.o, %.d, $(OBJ))
 
 # Execution options
-OPT = ./experiments/D-1.bmp -p 200 -t 0 -s 5 -r 1
+OPT = ./experiments/D1.bmp -p 200 -t 0 -s 5 -r 1
 TEST_SH = script.sh
 
 #######################################

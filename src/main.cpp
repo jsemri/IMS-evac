@@ -115,8 +115,8 @@ int main(int argc, char **argv) {
             stat.aggregate(ca.stat);
             
             // Progress bar
-            std::cout << "\r" << 100.0 * i / simulations << " %";
-            std::cout << std::flush;
+            //std::cout << "\r" << 100.0 * i / simulations << " %";
+            //std::cout << std::flush;
         }
 
         // Normalize and display statistics
