@@ -1,7 +1,6 @@
 *.o
 *.d
 *.swp
-*.pdf
 *.toc
 *.dvi
 *.out

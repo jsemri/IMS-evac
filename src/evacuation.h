@@ -117,14 +117,16 @@ public:
     CA(unsigned height, unsigned width);
     ~CA() = default;
 
-    /// Apply transition function on CA states.
-    /// @return false if there are no people to evacuate, true otherwise
+    /**
+     * Apply transition function on CA states.
+     * @return false if there are no people to evacuate, true otherwise
+     */
     bool evolve();
 
-    /// Distribute people over the building.
+    /** Distribute people over the building. */
     void add_people(int people);
 
-    /// Distribute smoke over the building.
+    /** Distribute smoke over the building. */
     void add_smoke(int smoke);
 
     /**
@@ -136,15 +138,15 @@ public:
      */
     static CA load(const std::string &filename);
 
-    /// Store model description to "output.bmp".
+    /** Store model description to "output.bmp". */
     void show();
 
-    /// Copy the CA.
+    /** Copy the CA. */
     CA copy();
 
     // Inline methods:
 
-    /// Retrieve a cell at a specified position
+    /** Retrieve a cell at a specified position. */
     inline Cell& cell(int row, int col) {
         return cells[row][col];
     }
@@ -157,8 +159,10 @@ private:
 
     // methods
 
-    /// Return Moore neighbourhood of cells of specified type at current
-    /// position. Default returned cell types are defined above.
+    /**
+     * Get Moore neighbourhood of cells of specified type at current
+     * position. Default returned cell types are defined above.
+     */
     std::vector<CellPosition> cell_neighbourhood(
         CellPosition position, int cell_types = EmptyCells
     ) const;
@@ -166,12 +170,12 @@ private:
         size_t row, size_t col, int cell_types = EmptyCells
     ) const;
 
-    /// Recompute exit distances.
+    /** Recompute exit distances. */
     void recompute_shortest_paths();
 
     // Inline methods:
 
-    /// @ return true if cell coordinates are valid
+    /** @ return true if cell coordinates are valid */
     inline bool cell_check(int row, int col) const {
         if(row < 0 || col < 0) {
             return false;
@@ -179,8 +183,10 @@ private:
         return (unsigned) row < this->height && (unsigned) col < this->width;
     }
 
-    /// push an position(row,col) to the vector if cell at this position is
-    /// empty
+    /**
+     * Push an position(row,col) to the vector if cell at this position is
+     * empty
+     */
     inline void push_if(
         std::vector<CellPosition> &vec, size_t row, size_t col,
         int cell_types) const
@@ -190,17 +196,17 @@ private:
         }
     }
 
-    /// return a distance to exit from cell at specified position
+    /** @return a distance to exit from cell at specified position */
     inline int distance(CellPosition pos) const {
         return distance(pos.first, pos.second);
     }
 
-    /// return a distance to exit from cell at specified position
+    /** @return a distance to exit from cell at specified position */
     inline int distance(size_t row, size_t col) const {
         return cells[row][col].exit_distance;
     }
 
-    /// Retrieve a cell at a specified position
+    /** Retrieve a cell at a specified position. */
     inline Cell& cell(CellPosition pos) {
         return cell(pos.first, pos.second);
     }

@@ -11,6 +11,11 @@ HDR=$(wildcard $(SRCDIR)/*.h)
 OBJ=$(patsubst %.cpp, %.o, $(SRC))
 DEP=$(patsubst %.o, %.d, $(OBJ))
 
+DOCDIR = doc
+DOC = report.pdf
+DOX = Doxyfile
+ZIP = xsemri00.zip
+
 # Execution options
 OPT = ./experiments/D1.bmp -p 200 -t 0 -s 5 -r 1
 TEST_SH = exp.sh
@@ -32,7 +37,7 @@ $(PROG): $(OBJ)
 
 # Tidy up
 clean:
-	rm -f $(OBJ) $(PROG) $(DEP) *.pdf *.zip
+	rm -f $(OBJ) $(PROG) $(DEP) *.pdf *.zip; rm -rf html;
 
 # Run executable
 run: $(PROG)
@@ -46,9 +51,21 @@ valgrind: $(PROG)
 experiment: $(PROG) $(TEST_SH)
 	./$(TEST_SH)
 
+# Compile documentation
+documentation: $(DOCDIR)
+	make -C $(DOCDIR) && cp $(DOCDIR)/$(DOC) .;
+
 # Zip
-zip:
-	zip xsemri00 -r $(SRCDIR) 3rdparty experiments Makefile exp.sh report.pdf
+zip: $(SRCDIR) 3rdparty experiments Makefile exp.sh $(DOC)
+	zip $(ZIP) -r $^
+
+# Set Doxygen generation up
+$(DOX):
+	doxygen -g $@
+	
+# Create Doxygen
+doxygen: $(DOX)
+	(cat $(DOX); echo "JAVADOC_AUTOBRIEF=YES"; echo "GENERATE_LATEX=NO") | doxygen -
 
 #######################################
 # Shortcuts and dependencies
@@ -58,6 +75,7 @@ r: run
 v: valgrind
 cr: clean run
 e: experiment
+d: documentation
 z: zip
 
 -include $(DEP)
