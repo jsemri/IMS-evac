@@ -58,5 +58,6 @@ r: run
 v: valgrind
 cr: clean run
 e: experiment
+z: zip
 
 -include $(DEP)
