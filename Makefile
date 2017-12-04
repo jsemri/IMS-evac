@@ -32,7 +32,7 @@ $(PROG): $(OBJ)
 
 # Tidy up
 clean:
-	rm -f $(OBJ) $(PROG) $(DEP) *.zip
+	rm -f $(OBJ) $(PROG) $(DEP) *.pdf *.zip
 
 # Run executable
 run: $(PROG)
@@ -48,7 +48,7 @@ experiment: $(PROG) $(TEST_SH)
 
 # Zip
 zip:
-	zip xsemri00 -r $(SRCDIR) 3rdparty experiments Makefile exp.sh doc/report.pdf
+	zip xsemri00 -r $(SRCDIR) 3rdparty experiments Makefile exp.sh report.pdf
 
 #######################################
 # Shortcuts and dependencies
