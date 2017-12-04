@@ -14,7 +14,7 @@ DEP=$(patsubst %.o, %.d, $(OBJ))
 DOCDIR = doc
 DOC = report.pdf
 DOX = Doxyfile
-ZIP = xsemri00.zip
+ZIP = 07_xsemri00_xandri03.zip
 
 # Execution options
 OPT = ./experiments/D1.bmp -p 200 -t 0 -s 5 -r 1
