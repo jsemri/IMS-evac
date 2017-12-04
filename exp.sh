@@ -4,7 +4,7 @@ dir='./experiments';
 
 pedestrians=500;
 smoke=3;
-simulations=1000;
+simulations=1;
 delay=0;
 opt="-t $delay -p $pedestrians -s $smoke -r $simulations";
 

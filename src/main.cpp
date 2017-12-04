@@ -13,7 +13,7 @@
 #include <sys/types.h>
 
 #include "evacuation.h"
-#include "bitmap.h"    // remove after debug
+#include "bitmap.h"
 
 /** --help string. */
 static const char *helpstr =

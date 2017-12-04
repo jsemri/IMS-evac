@@ -34,8 +34,7 @@ CA::CA(unsigned height, unsigned width) :
 
 std::vector<CellPosition> CA::cell_neighbourhood(
     size_t row, size_t col, int cell_types
-) const
-{{{
+) const {
     std::vector<CellPosition> neighbours;
 
     push_if(neighbours, row - 1, col, cell_types);
@@ -48,17 +47,15 @@ std::vector<CellPosition> CA::cell_neighbourhood(
     push_if(neighbours, row + 1, col + 1, cell_types);
 
     return neighbours;
-}}}
+}
 
 std::vector<CellPosition> CA::cell_neighbourhood(
     CellPosition position, int cell_types
-) const
-{{{
+) const {
     return cell_neighbourhood(position.first, position.second, cell_types);
-}}}
+}
 
-bool CA::evolve()
-{{{
+bool CA::evolve() {
     bool res = false;
     stat.time += 1;
 
@@ -185,10 +182,9 @@ bool CA::evolve()
     }
 
     return res;
-}}}
+}
 
-void CA::add_smoke(int smoke)
-{{{
+void CA::add_smoke(int smoke) {
     std::vector<CellPosition> empty_cells;
     for (size_t i = 0; i < this->height; i++) {
         for (size_t j = 0; j < this->width; j++) {
@@ -208,11 +204,10 @@ void CA::add_smoke(int smoke)
         empty_cells.pop_back();
     }
 
-}}}
+}
 
 // somehow distribute people over empty cells
-void CA::add_people(int people_count)
-{{{
+void CA::add_people(int people_count) {
     stat.pedestrians = people_count;
     std::vector<CellPosition> empty_cells;
     std::vector<CellPosition> empty_priority_cells;
@@ -244,7 +239,7 @@ void CA::add_people(int people_count)
         cell(empty_cells.back()).type = Person;
         empty_cells.pop_back();
     }
-}}}
+}
 
 void CA::recompute_shortest_paths() {
     // Reset exit distances
@@ -356,138 +351,8 @@ void CA::recompute_shortest_paths() {
         }
     }
 }
-/*
-void CA::recompute_shortest_paths()
-{{{
-    // Reset exit distances
-    std::vector<std::vector<double>> min_distances(
-		this->height, std::vector<double>(this->width)
-	);
-    for (unsigned row = 0; row < this->height; row++) {
-        for (unsigned col = 0; col < this->width; col++) {
-            min_distances[row][col] = (double)UINT_MAX;
-        }
-    }
 
-    // Compute distance accruals for the whole state space
-    std::vector<std::vector<double>> accruals(
-		this->height, std::vector<double>(this->width)
-	);
-	for (unsigned row = 0; row < this->height; row++) {
-        for (unsigned col = 0; col < this->width; col++) {
-        	double accrual = 1.0;
-        	CellType type = cell(row,col).type;
-            if(type & (Person | PersonWithSmoke)) {
-                accrual *= occupied_distance;
-            }
-            if(type & (Smoke | PersonWithSmoke)) {
-                accrual *= smoke_distance;
-            }
-            accruals[row][col] = accrual;
-        }
-    }
-
-    // Apply Dijkstra for each exit state and keep minimum distances
-    for(auto es: exit_states) {
-    	// Initialize current distances
-        std::vector<std::vector<double>> distances(
-			this->height, std::vector<double>(this->width)
-		);
-        for (unsigned row = 0; row < this->height; row++) {
-        	for (unsigned col = 0; col < this->width; col++) {
-                distances[row][col] = (double) UINT_MAX;
-            }
-        }
-        distances[es.first][es.second] = 0.0;
-
-        // Vector of visited states
-        std::vector<std::vector<bool>> visited(
-			this->height, std::vector<bool>(this->width)
-		);
-        for (unsigned row = 0; row < this->height; row++) {
-            for (unsigned col = 0; col < this->width; col++) {
-                visited[row][col] = false;
-            }
-        }
-
-        // Queue of unprocessed successors
-        std::vector<CellPosition> unprocessed;
-        unprocessed.push_back(es);
-
-        // Compute distances
-        while(!unprocessed.empty()) {
-			// Find unprocessed state with minimum exit distance
-			CellPosition current = unprocessed[0];
-			int min = 0;
-			double current_distance = distances[current.first][current.second];
-			for(int i = 1; i < unprocessed.size(); i++) {
-				CellPosition cp = unprocessed[i];
-                double d = distances[cp.first][cp.second];
-                if(d < current_distance) {
-                    min = i;
-                    current = cp;
-                    current_distance = d;
-				}
-			}
-
-			// Visit minimum
-            unprocessed[min] = unprocessed.back();
-			unprocessed.pop_back();
-			visited[current.first][current.second] = true;
-
-            // Skip if the distance is no better then current mininum
-            if(current_distance > min_distances[current.first][current.second]) {
-            	continue;
-            }
-
-            // Cell types that are considered reachable
-            constexpr int succTypes =  Empty | Exit | Person | Smoke
-               | PersonAppearance | PersonAtExit | PersonWithSmoke;
-
-            // Generate successors
-            std::vector<CellPosition> successors;
-            successors = cell_neighbourhood(current, succTypes);
-
-            // Compute successor distance
-            double accrual = accruals[current.first][current.second];
-            double next_distance = current_distance + accrual;
-
-            // Process all successors
-            for(CellPosition successor: successors) {
-                // Skip processed successors
-                unsigned r = successor.first, c = successor.second;
-                if(!visited[r][c]) {
-                    visited[r][c] = true;
-                    // Update distance
-                    if(next_distance < distances[r][c]) {
-                        distances[r][c] = next_distance;
-                        unprocessed.push_back(successor);
-                    }
-                }
-            }
-        }
-
-        // Pick best distance
-        for(unsigned row = 0; row < this->height; row++) {
-            for(unsigned col = 0; col < this->width; col++) {
-                if(distances[row][col] < min_distances[row][col]) {
-                    min_distances[row][col] = distances[row][col];
-                }
-            }
-        }
-    }
-
-    // Store final result
-    for(unsigned row = 0; row < this->height; row++) {
-        for(unsigned col = 0; col < this->width; col++) {
-        	cell(row,col).exit_distance = min_distances[row][col];
-        }
-    }
-}}}
-*/
-
-CA CA::load(const std::string &filename)
-{{{
+CA CA::load(const std::string &filename) {
     // Load from image
     CA ca = Bitmap::load(filename);
 
@@ -505,7 +370,7 @@ CA CA::load(const std::string &filename)
 
     // Success
     return ca;
-}}}
+}
 
 CA CA::copy() {
 	CA cpy = CA(height, width);
@@ -515,16 +380,14 @@ CA CA::copy() {
 	return cpy;
 }
 
-void CA::show()
-{{{
+void CA::show() {
     Bitmap::store(*this, "output.bmp");
-}}}
+}
 
 
-std::string Statistics::str() const noexcept
-{{{
+std::string Statistics::str() const noexcept {
 	std::ostringstream ss;
-    //ss << "*********************************************************\n";
+    ss << "*********************************************************\n";
     float travelled = moves * cell_width;
     float realtime = time * time_step;
     ss << "Number of pedestrians              : " << pedestrians
@@ -541,10 +404,10 @@ std::string Statistics::str() const noexcept
         << std::endl;
     ss << "Mean distance travelled per person : "
         << travelled / pedestrians << " m" << std::endl;
-    //ss << "*********************************************************\n";
+    ss << "*********************************************************\n";
 
     return ss.str();
-}}}
+}
 
 void Statistics::aggregate(Statistics &other) {
 	time += other.time;
