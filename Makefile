@@ -37,7 +37,7 @@ $(PROG): $(OBJ)
 
 # Tidy up
 clean:
-	rm -f $(OBJ) $(PROG) $(DEP) *.pdf *.zip; rm -rf html;
+	rm -f $(OBJ) $(PROG) $(DEP) $(DOC) $(ZIP) $(DOX) -r html;
 
 # Run executable
 run: $(PROG)
@@ -56,7 +56,7 @@ documentation: $(DOCDIR)
 	make -C $(DOCDIR) && cp $(DOCDIR)/$(DOC) .;
 
 # Zip
-zip: $(SRCDIR) 3rdparty experiments Makefile exp.sh $(DOC)
+zip: $(SRCDIR) 3rdparty experiments Makefile $(DOC)
 	zip $(ZIP) -r $^
 
 # Set Doxygen generation up
@@ -65,7 +65,8 @@ $(DOX):
 	
 # Create Doxygen
 doxygen: $(DOX)
-	(cat $(DOX); echo "JAVADOC_AUTOBRIEF=YES"; echo "GENERATE_LATEX=NO") | doxygen -
+	(cat $(DOX); echo "INPUT=src"; echo "JAVADOC_AUTOBRIEF=YES"; \
+		echo "GENERATE_LATEX=NO") | doxygen -
 
 #######################################
 # Shortcuts and dependencies
@@ -77,5 +78,6 @@ cr: clean run
 e: experiment
 d: documentation
 z: zip
+dz: documentation zip
 
 -include $(DEP)
